@@ -1,5 +1,5 @@
 import { defaultRangeExtractor, useVirtualizer } from '@tanstack/react-virtual'
-import React, { ReactNode, RefObject, useEffect } from 'react'
+import React, { ReactNode, RefObject, useEffect, useMemo } from 'react'
 import {
   Cell,
   Column,
@@ -36,6 +36,11 @@ export const Grid = <T extends any>({
   insertRowAfter,
   stopEditing,
   onScroll,
+
+  loading,
+  loadingRowComponent,
+  loadingRowCount = 10,
+  loadingRowHeight,
 }: {
   data: T[]
   columns: Column<T, any, any>[]
@@ -61,9 +66,19 @@ export const Grid = <T extends any>({
   insertRowAfter: (row: number, count?: number) => void
   stopEditing: (opts?: { nextRow?: boolean }) => void
   onScroll?: React.UIEventHandler<HTMLDivElement>
+
+  loading?: boolean
+  loadingRowCount?: number
+  loadingRowHeight?: number
+  loadingRowComponent?: ReactNode
 }) => {
+  const LoadingComponent = useMemo(
+    () => loadingRowComponent ?? <div>Loading...</div>,
+    [loadingRowComponent]
+  )
+
   const rowVirtualizer = useVirtualizer({
-    count: data.length,
+    count: loading ? loadingRowCount : data.length,
     getScrollElement: () => outerRef.current,
     paddingStart: headerRowHeight,
     estimateSize: (index) => rowHeight(index).height,
@@ -239,21 +254,25 @@ export const Grid = <T extends any>({
                     width={col.size}
                     left={col.start}
                   >
-                    <Component
-                      rowData={data[row.index]}
-                      getContextMenuItems={getContextMenuItems}
-                      disabled={cellDisabled}
-                      active={cellIsActive}
-                      columnIndex={col.index - 1}
-                      rowIndex={row.index}
-                      focus={cellIsActive && editing}
-                      deleteRow={deleteGivenRow(row.index)}
-                      duplicateRow={duplicateGivenRow(row.index)}
-                      stopEditing={stopEditing}
-                      insertRowBelow={insertAfterGivenRow(row.index)}
-                      setRowData={setGivenRowData(row.index)}
-                      columnData={columns[col.index].columnData}
-                    />
+                    {loading ? (
+                      LoadingComponent
+                    ) : (
+                      <Component
+                        rowData={data[row.index]}
+                        getContextMenuItems={getContextMenuItems}
+                        disabled={cellDisabled}
+                        active={cellIsActive}
+                        columnIndex={col.index - 1}
+                        rowIndex={row.index}
+                        focus={cellIsActive && editing}
+                        deleteRow={deleteGivenRow(row.index)}
+                        duplicateRow={duplicateGivenRow(row.index)}
+                        stopEditing={stopEditing}
+                        insertRowBelow={insertAfterGivenRow(row.index)}
+                        setRowData={setGivenRowData(row.index)}
+                        columnData={columns[col.index].columnData}
+                      />
+                    )}
                   </CellComponent>
                 )
               })}

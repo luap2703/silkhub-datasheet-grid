@@ -72,14 +72,16 @@ export const DataSheetGrid = React.memo(
         gutterColumn,
         stickyRightColumn,
         rowKey,
-        addRowsComponent: AddRowsComponent = AddRows,
+        addRowsComponent: AddRowsComponent = (props) => <AddRows {...props} />,
         createRow = DEFAULT_CREATE_ROW as () => T,
         autoAddRow = false,
         lockRows = false,
         disableExpandSelection = false,
         disableSmartDelete = false,
         duplicateRow = DEFAULT_DUPLICATE_ROW,
-        contextMenuComponent: ContextMenuComponent = ContextMenu,
+        contextMenuComponent: ContextMenuComponent = (props) => (
+          <ContextMenu {...props} />
+        ),
         disableContextMenu: disableContextMenuRaw = false,
         onFocus = DEFAULT_EMPTY_CALLBACK,
         onBlur = DEFAULT_EMPTY_CALLBACK,
@@ -273,7 +275,6 @@ export const DataSheetGrid = React.memo(
         [
           columnRights,
           columnWidths,
-          data.length,
           getInnerBoundingClientRect,
           getOuterBoundingClientRect,
           headerRowHeight,
@@ -395,12 +396,13 @@ export const DataSheetGrid = React.memo(
               1
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            const scrollTop = outerRef.current!.scrollTop
+            if (!outerRef.current) return
+            const scrollTop = outerRef.current.scrollTop
 
             if (scrollTop > topMax) {
-              outerRef.current!.scrollTop = topMax
+              outerRef.current.scrollTop = topMax
             } else if (scrollTop < topMin) {
-              outerRef.current!.scrollTop = topMin
+              outerRef.current.scrollTop = topMin
             }
           }
 
@@ -572,14 +574,15 @@ export const DataSheetGrid = React.memo(
           ])
         },
         [
+          disableSmartDelete,
           activeCell,
-          columns,
+          selection?.min,
+          selection?.max,
           data,
+          onChange,
+          columns,
           deleteRows,
           isCellDisabled,
-          onChange,
-          selection?.max,
-          selection?.min,
           setActiveCell,
           setSelectionCell,
           hasStickyRightColumn,
