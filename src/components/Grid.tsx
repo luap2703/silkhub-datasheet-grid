@@ -6,6 +6,7 @@ import {
   ContextMenuItem,
   DataSheetGridProps,
   Selection,
+  TableCallbackProps,
 } from '../types'
 import cx from 'classnames'
 import { Cell as CellComponent } from './Cell'
@@ -41,6 +42,15 @@ export const Grid = <T extends any>({
   loadingRowComponent,
   loadingRowCount = 10,
   loadingRowHeight,
+
+  selectedRows,
+  selectRows,
+
+  toggleSelection,
+  selectAllRows,
+
+  getRowId,
+  table,
 }: {
   data: T[]
   columns: Column<T, any, any>[]
@@ -71,6 +81,16 @@ export const Grid = <T extends any>({
   loadingRowCount?: number
   loadingRowHeight?: number
   loadingRowComponent?: ReactNode
+
+  selectedRows: Set<string>
+
+  selectRows: (rowSelection: string[] | ((prev: string[]) => string[])) => void
+
+  toggleSelection: (rowIndex: number) => void
+  getRowId: (rowIndex: number) => string
+  selectAllRows: () => void
+
+  table: TableCallbackProps
 }) => {
   const LoadingComponent = useMemo(
     () => loadingRowComponent ?? <div>Loading...</div>,
@@ -86,8 +106,8 @@ export const Grid = <T extends any>({
         ? loadingRowHeight ?? rowHeight(index).height
         : rowHeight(index).height,
     getItemKey: (index: number): React.Key => {
-      if (rowKey && index > 0 && !loading) {
-        const row = data[index - 1]
+      if (rowKey && !loading) {
+        const row = data[index]
         if (typeof rowKey === 'function') {
           return rowKey({ rowData: row, rowIndex: index })
         } else if (
@@ -142,6 +162,12 @@ export const Grid = <T extends any>({
   const selectionMinRow = selection?.min.row ?? activeCell?.row
   const selectionMaxRow = selection?.max.row ?? activeCell?.row
 
+  const toggleGivenRow = useMemoizedIndexCallback(toggleSelection, 0)
+
+  const _selectedRows = useMemo(() => {
+    return Array.from(selectedRows)
+  }, [selectedRows])
+
   return (
     <div
       ref={outerRef}
@@ -164,30 +190,50 @@ export const Grid = <T extends any>({
               height: headerRowHeight,
             }}
           >
-            {colVirtualizer.getVirtualItems().map((col) => (
-              <CellComponent
-                key={col.key}
-                gutter={col.index === 0}
-                stickyRight={
-                  hasStickyRightColumn && col.index === columns.length - 1
-                }
-                width={col.size}
-                left={col.start}
-                className={cx(
-                  'dsg-cell-header',
-                  selectionColMin !== undefined &&
-                    selectionColMax !== undefined &&
-                    selectionColMin <= col.index - 1 &&
-                    selectionColMax >= col.index - 1 &&
-                    'dsg-cell-header-active',
-                  columns[col.index].headerClassName
-                )}
-              >
-                <div className="dsg-cell-header-container">
-                  {columns[col.index].title}
-                </div>
-              </CellComponent>
-            ))}
+            {colVirtualizer.getVirtualItems().map((col) => {
+              const Header: React.FC<{
+                columnData: any
+                selectedRows: string[]
+                selectRows: (
+                  rowSelection: string[] | ((prev: string[]) => string[])
+                ) => void
+                selectAllRows: () => void
+              }> = columns[col.index].title
+                ? typeof columns[col.index].title === 'function'
+                  ? (columns[col.index].title as React.FC) // Ensure it's treated as a functional component
+                  : () => columns[col.index].title as any
+                : () => <></>
+
+              return (
+                <CellComponent
+                  key={col.key}
+                  gutter={col.index === 0}
+                  stickyRight={
+                    hasStickyRightColumn && col.index === columns.length - 1
+                  }
+                  width={col.size}
+                  left={col.start}
+                  className={cx(
+                    'dsg-cell-header',
+                    selectionColMin !== undefined &&
+                      selectionColMax !== undefined &&
+                      selectionColMin <= col.index - 1 &&
+                      selectionColMax >= col.index - 1 &&
+                      'dsg-cell-header-active',
+                    columns[col.index].headerClassName
+                  )}
+                >
+                  <div className="dsg-cell-header-container">
+                    <Header
+                      columnData={columns[col.index].columnData}
+                      selectedRows={_selectedRows}
+                      selectRows={selectRows}
+                      selectAllRows={selectAllRows}
+                    />
+                  </div>
+                </CellComponent>
+              )
+            })}
           </div>
         )}
         {rowVirtualizer.getVirtualItems().map((row) => {
@@ -195,11 +241,15 @@ export const Grid = <T extends any>({
             row.index >= (selectionMinRow ?? Infinity) &&
               row.index <= (selectionMaxRow ?? -Infinity)
           )
+
+          const rowSelected = selectedRows.has(row.key.toString())
+
           return (
             <div
               key={row.key}
               className={cx(
                 'dsg-row',
+                rowSelected && 'dsg-row-selected',
                 typeof rowClassName === 'string' ? rowClassName : null,
                 typeof rowClassName === 'function'
                   ? rowClassName({
@@ -268,6 +318,7 @@ export const Grid = <T extends any>({
                         rowData={data[row.index]}
                         getContextMenuItems={getContextMenuItems}
                         disabled={cellDisabled}
+                        rowId={row.key.toString()}
                         active={cellIsActive}
                         columnIndex={col.index - 1}
                         rowIndex={row.index}
@@ -278,6 +329,11 @@ export const Grid = <T extends any>({
                         insertRowBelow={insertAfterGivenRow(row.index)}
                         setRowData={setGivenRowData(row.index)}
                         columnData={columns[col.index].columnData}
+                        selected={rowSelected}
+                        selectRows={selectRows}
+                        toggleSelection={toggleGivenRow(row.index)}
+                        getRowId={getRowId}
+                        table={table}
                       />
                     )}
                   </CellComponent>

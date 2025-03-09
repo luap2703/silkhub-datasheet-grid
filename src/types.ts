@@ -10,25 +10,50 @@ export type Selection = { min: Cell; max: Cell }
 export type CellProps<T, C> = {
   rowData: T
   rowIndex: number
+  rowId: string
   columnIndex: number
   active: boolean
   focus: boolean
   disabled: boolean
   columnData: C
+} & CellHandlersProps<T>
+
+export type CellHandlersProps<T> = {
   setRowData: (rowData: T) => void
   stopEditing: (opts?: { nextRow?: boolean }) => void
   insertRowBelow: () => void
   duplicateRow: () => void
   deleteRow: () => void
   getContextMenuItems: () => ContextMenuItem[]
+
+  selected: boolean
+  toggleSelection: ToggleSelectionHandler
+  selectRows: SelectRowsHandler
+
+  getRowId: (rowIndex: number) => React.Key
+
+  table: TableCallbackProps
 }
 
+export type ToggleSelectionHandler = () => void
+export type SelectRowsHandler = (
+  rowSelection: string[] | ((prev: string[]) => string[])
+) => void
+
 export type CellComponent<T, C> = (props: CellProps<T, C>) => JSX.Element
+export type HeaderCellComponent<C> = (opts: {
+  columnData: C
+  selectedRows: string[]
+  selectRows: SelectRowsHandler
+  toggleSelection: ToggleSelectionHandler
+  selectAllRows: () => void
+}) => React.ReactNode
 
 export type Column<T, C, PasteValue> = {
   id?: string
   headerClassName?: string
-  title?: React.ReactNode
+  title?: React.ReactNode | HeaderCellComponent<C>
+
   /** @deprecated Use `basis`, `grow`, and `shrink` instead */
   width?: string | number
   basis: number
@@ -53,6 +78,18 @@ export type Column<T, C, PasteValue> = {
   pasteValue: (opt: { rowData: T; value: PasteValue; rowIndex: number }) => T
   prePasteValues: (values: string[]) => PasteValue[] | Promise<PasteValue[]>
   isCellEmpty: (opt: { rowData: T; rowIndex: number }) => boolean
+
+  onCellKeyDown?: (
+    opt: {
+      rowData: T
+      rowId: string
+      columnId?: string
+      isActive: boolean
+    } & CellHandlersProps<T>,
+    e: React.KeyboardEvent
+  ) => void
+
+  disableEditing: boolean
 }
 
 export type SelectionContextType = {
@@ -168,14 +205,22 @@ export type DataSheetGridProps<T> = {
   loadingRowCount?: number
   loadingRowHeight?: number
   loadingRowComponent?: ReactNode
+
+  rowSelection?: string[]
+  onRowSelectionChange?:
+    | ((rowSelection: string[] | ((prev: string[]) => string[])) => void)
+    | undefined
 }
 
-type CellWithIdInput = {
+export type CellWithIdInput = {
   col: number | string
   row: number
 }
 
-type SelectionWithIdInput = { min: CellWithIdInput; max: CellWithIdInput }
+export type SelectionWithIdInput = {
+  min: CellWithIdInput
+  max: CellWithIdInput
+}
 
 export type CellWithId = {
   colId?: string
@@ -190,4 +235,9 @@ export type DataSheetGridRef = {
   selection: SelectionWithId | null
   setActiveCell: (activeCell: CellWithIdInput | null) => void
   setSelection: (selection: SelectionWithIdInput | null) => void
+}
+
+export type TableCallbackProps = {
+  setSelection: (selection: SelectionWithId | null) => void
+  setActiveCell: (activeCell: CellWithId | null) => void
 }

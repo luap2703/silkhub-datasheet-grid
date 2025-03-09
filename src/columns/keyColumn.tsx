@@ -38,7 +38,6 @@ const KeyComponent: CellComponent<any, ColumnData> = ({
     />
   )
 }
-
 export const keyColumn = <
   T extends Record<string, any>,
   K extends keyof T = keyof T,
@@ -76,10 +75,41 @@ export const keyColumn = <
     typeof column.cellClassName === 'function'
       ? ({ rowData, rowIndex, columnId }) => {
           return typeof column.cellClassName === 'function'
-            ? column.cellClassName({ rowData: rowData[key], rowIndex, columnId })
+            ? column.cellClassName({
+                rowData: rowData[key],
+                rowIndex,
+                columnId,
+              })
             : column.cellClassName ?? undefined
         }
       : column.cellClassName,
   isCellEmpty: ({ rowData, rowIndex }) =>
     column.isCellEmpty?.({ rowData: rowData[key], rowIndex }) ?? false,
+
+  onCellKeyDown: ({ rowData, rowId, columnId, ...props }, e) =>
+    column.onCellKeyDown?.(
+      { rowData: rowData[key], rowId, columnId, ...props },
+      e
+    ),
 })
+
+// Type as path of TransferInboundFailedEvent
+export type NestedKey<Obj, Depth extends number = 3> = Depth extends 0
+  ? never
+  : {
+      [K in keyof Obj & string]: Obj[K] extends Record<string, any>
+        ? NestedKey<Obj[K], Decrement<Depth>> extends infer R
+          ? [R] extends [never]
+            ? `${K}`
+            : `${K}` | `${K}.${Extract<R, string>}`
+          : never
+        : `${K}`
+    }[keyof Obj & string]
+
+type Decrement<T extends number> = T extends 3
+  ? 2
+  : T extends 2
+  ? 1
+  : T extends 1
+  ? 0
+  : never

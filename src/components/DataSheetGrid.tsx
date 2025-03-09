@@ -8,12 +8,15 @@ import React, {
 } from 'react'
 import {
   Cell,
+  CellWithIdInput,
   Column,
   ContextMenuItem,
   DataSheetGridProps,
   DataSheetGridRef,
   Operation,
   Selection,
+  SelectionWithIdInput,
+  TableCallbackProps,
 } from '../types'
 import { useColumnWidths } from '../hooks/useColumnWidths'
 import { useResizeDetector } from 'react-resize-detector'
@@ -42,6 +45,7 @@ import { getAllTabbableElements } from '../utils/tab'
 import { Grid } from './Grid'
 import { SelectionRect } from './SelectionRect'
 import { useRowHeights } from '../hooks/useRowHeights'
+import { useRowSelection } from '../hooks/useRowSelection'
 
 const DEFAULT_DATA: any[] = []
 const DEFAULT_COLUMNS: Column<any, any, any>[] = []
@@ -95,6 +99,9 @@ export const DataSheetGrid = React.memo(
         loadingRowComponent = null,
         loadingRowCount,
         loadingRowHeight,
+
+        rowSelection,
+        onRowSelectionChange,
       }: DataSheetGridProps<T>,
       ref: React.ForwardedRef<DataSheetGridRef>
     ): JSX.Element => {
@@ -106,6 +113,14 @@ export const DataSheetGrid = React.memo(
       const outerRef = useRef<HTMLDivElement>(null)
       const beforeTabIndexRef = useRef<HTMLDivElement>(null)
       const afterTabIndexRef = useRef<HTMLDivElement>(null)
+
+      const { selectedRows, handleRowSelection, selectRows } = useRowSelection(
+        rowSelection,
+        onRowSelectionChange
+      )
+
+      const selectedRowsRef = useRef(selectedRows)
+      selectedRowsRef.current = selectedRows
 
       // Default value is 1 for the border
       const [heightDiff, setHeightDiff] = useDebounceState(1, 100)
@@ -594,11 +609,14 @@ export const DataSheetGrid = React.memo(
         ]
       )
 
+      const activeCellRef = useRef(activeCell)
+      activeCellRef.current = activeCell
+
       const stopEditing = useCallback(
         ({ nextRow = true } = {}) => {
-          if (activeCell?.row === dataRef.current.length - 1) {
+          if (activeCellRef.current?.row === dataRef.current.length - 1) {
             if (nextRow && autoAddRow) {
-              insertRowAfter(activeCell.row)
+              insertRowAfter(activeCellRef.current?.row)
             } else {
               setEditing(false)
             }
@@ -610,7 +628,7 @@ export const DataSheetGrid = React.memo(
             }
           }
         },
-        [activeCell?.row, autoAddRow, insertRowAfter, setActiveCell]
+        [autoAddRow, insertRowAfter, setActiveCell]
       )
 
       const onCopy = useCallback(
@@ -893,6 +911,46 @@ export const DataSheetGrid = React.memo(
 
       useDocumentEventListener('paste', onPaste)
 
+      const contextMenuItemsRef = useRef(contextMenuItems)
+      contextMenuItemsRef.current = contextMenuItems
+
+      const getContextMenuItems = useCallback(
+        () => contextMenuItemsRef.current,
+        []
+      )
+
+      const getRowId = useCallback(
+        (rowIndex: number) =>
+          typeof rowKey === 'function'
+            ? rowKey({
+                rowIndex: rowIndex,
+                rowData: dataRef.current[rowIndex],
+              })
+            : rowKey ?? rowIndex.toString(),
+        [rowKey]
+      )
+
+      const toggleSelection = useCallback(
+        (rowIndex: number) => {
+          const rowId = getRowId(rowIndex)
+
+          selectRows((prev) => {
+            if (prev.includes(rowId)) {
+              return prev.filter((id) => id !== rowId)
+            } else {
+              return [...prev, rowId]
+            }
+          })
+        },
+        [getRowId, selectRows]
+      )
+
+      const selectAllRows = useCallback(() => {
+        selectRows((prev) => {
+          return [...new Set([...prev, ...data.map((_, i) => getRowId(i))])]
+        })
+      }, [data, getRowId, selectRows])
+
       const onMouseDown = useCallback(
         (event: MouseEvent) => {
           if (contextMenu && contextMenuItems.length) {
@@ -1019,7 +1077,12 @@ export const DataSheetGrid = React.memo(
             lastEditingCellRef.current = activeCell
           }
 
-          setEditing(Boolean(clickOnActiveCell && !rightClick))
+          const activeCol = activeCell ? columns[activeCell?.col + 1] : null
+          setEditing(
+            Boolean(
+              clickOnActiveCell && !rightClick && !activeCol?.disableEditing
+            )
+          )
           setSelectionMode(
             cursorIndex && !rightClick
               ? {
@@ -1287,6 +1350,61 @@ export const DataSheetGrid = React.memo(
       )
       useDocumentEventListener('mousemove', onMouseMove)
 
+      const onCellKeyDown = useCallback(
+        (
+          rowId: React.Key,
+          columnId: React.Key,
+          e: React.KeyboardEvent,
+          isActive: boolean
+        ) => {
+          const rowIndex = dataRef.current.findIndex(
+            (row) => getRowId(dataRef.current.indexOf(row)) === rowId
+          )
+          const columnIndex = columns.findIndex(
+            (column) => column.id === columnId
+          )
+
+          const fn = columns[columnIndex]?.onCellKeyDown
+
+          if (fn) {
+            fn(
+              {
+                rowData: dataRef.current[rowIndex],
+                rowId: rowId.toString(),
+                columnId: columnId.toString(),
+                setRowData: () =>
+                  setRowData(rowIndex, dataRef.current[rowIndex]),
+                stopEditing,
+                deleteRow: () => deleteRows(rowIndex),
+                duplicateRow: () => duplicateRows(rowIndex),
+                insertRowBelow: () => insertRowAfter(rowIndex),
+                toggleSelection: () => toggleSelection(rowIndex),
+                selected: selectedRowsRef.current.has(getRowId(rowIndex)),
+                getContextMenuItems,
+                selectRows,
+                getRowId,
+                table: tableCallbacks.current,
+
+                isActive,
+              },
+              e
+            )
+          }
+        },
+        [
+          columns,
+          deleteRows,
+          duplicateRows,
+          getContextMenuItems,
+          getRowId,
+          insertRowAfter,
+          selectRows,
+          setRowData,
+          stopEditing,
+          toggleSelection,
+        ]
+      )
+
       const onKeyDown = useCallback(
         (event: KeyboardEvent) => {
           if (!activeCell) {
@@ -1294,6 +1412,7 @@ export const DataSheetGrid = React.memo(
           }
 
           if (event.isComposing) {
+            console.log('is composing')
             return
           }
 
@@ -1500,24 +1619,34 @@ export const DataSheetGrid = React.memo(
               event.preventDefault()
             }
           }
+
+          const activeColumn = columns[activeCell.col + 1]
+          onCellKeyDown(
+            getRowId(activeCell.row),
+            activeColumn.id ?? (activeCell.col + 1).toString(),
+            event as unknown as React.KeyboardEvent,
+            activeCell.row === selection?.max.row
+          )
         },
         [
           activeCell,
           columns,
-          data.length,
-          deleteSelection,
-          duplicateRows,
-          editing,
-          insertRowAfter,
-          isCellDisabled,
-          scrollTo,
+          hasStickyRightColumn,
+          onCellKeyDown,
+          getRowId,
           selection?.max.row,
           selection?.min.row,
-          selectionCell,
+          data.length,
           setActiveCell,
           setSelectionCell,
+          editing,
+          selectionCell,
+          isCellDisabled,
           stopEditing,
-          hasStickyRightColumn,
+          scrollTo,
+          insertRowAfter,
+          duplicateRows,
+          deleteSelection,
         ]
       )
       useDocumentEventListener('keydown', onKeyDown)
@@ -1677,35 +1806,8 @@ export const DataSheetGrid = React.memo(
         applyPasteDataToDatasheet,
       ])
 
-      const contextMenuItemsRef = useRef(contextMenuItems)
-      contextMenuItemsRef.current = contextMenuItems
-
-      const getContextMenuItems = useCallback(
-        () => contextMenuItemsRef.current,
-        []
-      )
-
-      useImperativeHandle(ref, () => ({
-        activeCell: getCellWithId(activeCell, columns),
-        selection: getSelectionWithId(
-          selection ??
-            (activeCell ? { min: activeCell, max: activeCell } : null),
-          columns
-        ),
-        setSelection: (value) => {
-          const selection = getSelection(
-            value,
-            columns.length - (hasStickyRightColumn ? 2 : 1),
-            data.length,
-            columns
-          )
-
-          setActiveCell(selection?.min || null)
-          setEditing(false)
-          setSelectionMode({ columns: false, active: false, rows: false })
-          setSelectionCell(selection?.max || null)
-        },
-        setActiveCell: (value) => {
+      const _setActiveCell = useCallback(
+        (value: CellWithIdInput | null) => {
           const cell = getCell(
             value,
             columns.length - (hasStickyRightColumn ? 2 : 1),
@@ -1718,6 +1820,42 @@ export const DataSheetGrid = React.memo(
           setSelectionMode({ columns: false, active: false, rows: false })
           setSelectionCell(null)
         },
+        [
+          columns,
+          data.length,
+          hasStickyRightColumn,
+          setActiveCell,
+          setSelectionCell,
+          setSelectionMode,
+        ]
+      )
+
+      const _setSelection = useCallback(
+        (value: SelectionWithIdInput | null) => {
+          const selection = getSelection(
+            value,
+            columns.length - (hasStickyRightColumn ? 2 : 1),
+            data.length,
+            columns
+          )
+
+          setActiveCell(selection?.min || null)
+          setEditing(false)
+          setSelectionMode({ columns: false, active: false, rows: false })
+          setSelectionCell(selection?.max || null)
+        }, // eslint-disable-next-line react-hooks/exhaustive-deps
+        [columns, data.length, hasStickyRightColumn]
+      )
+
+      useImperativeHandle(ref, () => ({
+        activeCell: getCellWithId(activeCell, columns),
+        selection: getSelectionWithId(
+          selection ??
+            (activeCell ? { min: activeCell, max: activeCell } : null),
+          columns
+        ),
+        setSelection: _setSelection,
+        setActiveCell: _setActiveCell,
       }))
 
       const callbacksRef = useRef({
@@ -1730,6 +1868,14 @@ export const DataSheetGrid = React.memo(
       callbacksRef.current.onBlur = onBlur
       callbacksRef.current.onActiveCellChange = onActiveCellChange
       callbacksRef.current.onSelectionChange = onSelectionChange
+
+      const tableCallbacks = useRef<TableCallbackProps>({
+        setSelection: _setSelection,
+        setActiveCell: _setActiveCell,
+      })
+
+      tableCallbacks.current.setSelection = _setSelection
+      tableCallbacks.current.setActiveCell = _setActiveCell
 
       useEffect(() => {
         if (lastEditingCellRef.current) {
@@ -1813,6 +1959,12 @@ export const DataSheetGrid = React.memo(
             loadingRowComponent={loadingRowComponent}
             loadingRowCount={loadingRowCount}
             loadingRowHeight={loadingRowHeight}
+            selectedRows={selectedRows}
+            selectRows={selectRows}
+            toggleSelection={toggleSelection}
+            selectAllRows={selectAllRows}
+            getRowId={getRowId}
+            table={tableCallbacks.current}
           >
             <SelectionRect
               columnRights={columnRights}

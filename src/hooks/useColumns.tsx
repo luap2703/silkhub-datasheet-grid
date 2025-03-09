@@ -140,6 +140,7 @@ export const useColumns = <T extends any>(
         pasteValue: column.pasteValue ?? identityRow,
         prePasteValues: column.prePasteValues ?? defaultPrePasteValues,
         isCellEmpty: column.isCellEmpty ?? defaultIsCellEmpty,
+        disableEditing: column.disableEditing ?? false,
       }
     })
   }, [gutterColumn, stickyRightColumn, columns])
