@@ -90,6 +90,11 @@ export const DataSheetGrid = React.memo(
         rowClassName,
         cellClassName,
         onScroll,
+
+        loading = false,
+        loadingRowComponent = null,
+        loadingRowCount,
+        loadingRowHeight,
       }: DataSheetGridProps<T>,
       ref: React.ForwardedRef<DataSheetGridRef>
     ): JSX.Element => {
@@ -1804,6 +1809,10 @@ export const DataSheetGrid = React.memo(
             stopEditing={stopEditing}
             cellClassName={cellClassName}
             onScroll={onScroll}
+            loading={loading}
+            loadingRowComponent={loadingRowComponent}
+            loadingRowCount={loadingRowCount}
+            loadingRowHeight={loadingRowHeight}
           >
             <SelectionRect
               columnRights={columnRights}

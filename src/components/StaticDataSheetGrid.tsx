@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { DataSheetGrid } from './DataSheetGrid'
 import React from 'react'
 
+// eslint-disable-next-line react/display-name
 export const StaticDataSheetGrid = React.forwardRef<
   DataSheetGridRef,
   DataSheetGridProps<any>

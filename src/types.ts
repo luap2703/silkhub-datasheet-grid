@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { ReactNode } from 'react'
 
 export type Cell = {
   col: number
@@ -167,7 +167,7 @@ export type DataSheetGridProps<T> = {
   loading?: boolean
   loadingRowCount?: number
   loadingRowHeight?: number
-  loadingRowComponent?: React.ComponentType<Record<string, unknown>>
+  loadingRowComponent?: ReactNode
 }
 
 type CellWithIdInput = {

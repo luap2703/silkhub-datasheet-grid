@@ -81,9 +81,12 @@ export const Grid = <T extends any>({
     count: loading ? loadingRowCount : data.length,
     getScrollElement: () => outerRef.current,
     paddingStart: headerRowHeight,
-    estimateSize: (index) => rowHeight(index).height,
+    estimateSize: (index) =>
+      loading
+        ? loadingRowHeight ?? rowHeight(index).height
+        : rowHeight(index).height,
     getItemKey: (index: number): React.Key => {
-      if (rowKey && index > 0) {
+      if (rowKey && index > 0 && !loading) {
         const row = data[index - 1]
         if (typeof rowKey === 'function') {
           return rowKey({ rowData: row, rowIndex: index })
@@ -236,20 +239,24 @@ export const Grid = <T extends any>({
                     active={col.index === 0 && rowActive}
                     disabled={cellDisabled}
                     className={cx(
-                      typeof colCellClassName === 'function'
-                        ? colCellClassName({
-                            rowData: data[row.index],
-                            rowIndex: row.index,
-                            columnId: columns[col.index].id,
-                          })
-                        : colCellClassName,
-                      typeof cellClassName === 'function'
-                        ? cellClassName({
-                            rowData: data[row.index],
-                            rowIndex: row.index,
-                            columnId: columns[col.index].id,
-                          })
-                        : cellClassName
+                      !loading
+                        ? typeof colCellClassName === 'function' // Disable when loading to prevent any special behavior for loading view
+                          ? colCellClassName({
+                              rowData: data[row.index],
+                              rowIndex: row.index,
+                              columnId: columns[col.index].id,
+                            })
+                          : colCellClassName
+                        : undefined,
+                      !loading
+                        ? typeof cellClassName === 'function'
+                          ? cellClassName({
+                              rowData: data[row.index],
+                              rowIndex: row.index,
+                              columnId: columns[col.index].id,
+                            })
+                          : cellClassName
+                        : undefined
                     )}
                     width={col.size}
                     left={col.start}
