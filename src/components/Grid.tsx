@@ -171,12 +171,13 @@ export const Grid = <T extends any>({
   return (
     <div
       ref={outerRef}
-      className={cx('dsg-container')}
+      className={cx('dsg-container', 'group/container')}
       data-state={loading ? 'loading' : 'loaded'}
       onScroll={onScroll}
       style={{ height: displayHeight }}
     >
       <div
+        className="group/inner-container"
         ref={innerRef}
         style={{
           width: fullWidth ? '100%' : colVirtualizer.getTotalSize(),
@@ -185,7 +186,7 @@ export const Grid = <T extends any>({
       >
         {headerRowHeight > 0 && (
           <div
-            className={cx('dsg-row', 'dsg-row-header')}
+            className={cx('dsg-row', 'group/row', 'dsg-row-header')}
             style={{
               width: fullWidth ? '100%' : colVirtualizer.getTotalSize(),
               height: headerRowHeight,
@@ -250,6 +251,7 @@ export const Grid = <T extends any>({
               key={row.key}
               className={cx(
                 'dsg-row',
+                'group/row',
                 rowSelected && 'dsg-row-selected',
                 typeof rowClassName === 'string' ? rowClassName : null,
                 typeof rowClassName === 'function'

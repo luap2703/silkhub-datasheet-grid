@@ -24,6 +24,7 @@ export const Cell: FC<{
     <div
       className={cx(
         'dsg-cell',
+        'group/cell',
         gutter && 'dsg-cell-gutter',
         disabled && 'dsg-cell-disabled',
         gutter && active && 'dsg-cell-gutter-active',
