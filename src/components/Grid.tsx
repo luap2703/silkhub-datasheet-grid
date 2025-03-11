@@ -207,7 +207,7 @@ export const Grid = <T extends any>({
               return (
                 <CellComponent
                   key={col.key}
-                  gutter={col.index === 0}
+                  gutter={!loading && col.index === 0}
                   stickyRight={
                     hasStickyRightColumn && col.index === columns.length - 1
                   }
@@ -282,7 +282,7 @@ export const Grid = <T extends any>({
                 return (
                   <CellComponent
                     key={col.key}
-                    gutter={col.index === 0}
+                    gutter={!loading && col.index === 0}
                     stickyRight={
                       hasStickyRightColumn && col.index === columns.length - 1
                     }

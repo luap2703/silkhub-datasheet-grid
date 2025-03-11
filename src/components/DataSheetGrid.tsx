@@ -633,11 +633,11 @@ export const DataSheetGrid = React.memo(
 
       const onCopy = useCallback(
         async (event?: ClipboardEvent) => {
-          if (!editing && activeCell) {
+          if (!editing && activeCellRef.current) {
             const copyData: Array<Array<number | string | null>> = []
 
-            const min: Cell = selection?.min || activeCell
-            const max: Cell = selection?.max || activeCell
+            const min: Cell = selection?.min || activeCellRef.current
+            const max: Cell = selection?.max || activeCellRef.current
 
             for (let row = min.row; row <= max.row; ++row) {
               copyData.push([])
@@ -705,26 +705,26 @@ export const DataSheetGrid = React.memo(
             }
           }
         },
-        [activeCell, columns, data, editing, selection]
+        [columns, data, editing, selection]
       )
       useDocumentEventListener('copy', onCopy)
 
       const onCut = useCallback(
         (event?: ClipboardEvent) => {
-          if (!editing && activeCell) {
+          if (!editing && activeCellRef.current) {
             onCopy(event)
             deleteSelection(false)
           }
         },
-        [activeCell, deleteSelection, editing, onCopy]
+        [deleteSelection, editing, onCopy]
       )
       useDocumentEventListener('cut', onCut)
 
       const applyPasteDataToDatasheet = useCallback(
         async (pasteData: string[][]) => {
-          if (!editing && activeCell) {
-            const min: Cell = selection?.min || activeCell
-            const max: Cell = selection?.max || activeCell
+          if (!editing && activeCellRef.current) {
+            const min: Cell = selection?.min || activeCellRef.current
+            const max: Cell = selection?.max || activeCellRef.current
 
             const results = await Promise.all(
               pasteData[0].map((_, columnIndex) => {
@@ -869,7 +869,6 @@ export const DataSheetGrid = React.memo(
           }
         },
         [
-          activeCell,
           columns,
           createRow,
           data,
@@ -887,7 +886,7 @@ export const DataSheetGrid = React.memo(
 
       const onPaste = useCallback(
         (event: ClipboardEvent) => {
-          if (activeCell && !editing) {
+          if (activeCellRef.current && !editing) {
             let pasteData = [['']]
             if (event.clipboardData?.types.includes('text/html')) {
               pasteData = parseTextHtmlData(
@@ -906,7 +905,7 @@ export const DataSheetGrid = React.memo(
             event.preventDefault()
           }
         },
-        [activeCell, applyPasteDataToDatasheet, editing]
+        [applyPasteDataToDatasheet, editing]
       )
 
       useDocumentEventListener('paste', onPaste)
@@ -969,8 +968,8 @@ export const DataSheetGrid = React.memo(
           if (
             !clickInside &&
             editing &&
-            activeCell &&
-            columns[activeCell.col + 1].keepFocus
+            activeCellRef.current &&
+            columns[activeCellRef.current.col + 1].keepFocus
           ) {
             return
           }
@@ -980,17 +979,17 @@ export const DataSheetGrid = React.memo(
             event.target.className.includes('dsg-expand-rows-indicator')
           ) {
             setExpandingSelectionFromRowIndex(
-              Math.max(activeCell?.row ?? 0, selection?.max.row ?? 0)
+              Math.max(activeCellRef.current?.row ?? 0, selection?.max.row ?? 0)
             )
             return
           }
 
           const clickOnActiveCell =
             cursorIndex &&
-            activeCell &&
-            activeCell.col === cursorIndex.col &&
-            activeCell.row === cursorIndex.row &&
-            !isCellDisabled(activeCell)
+            activeCellRef.current &&
+            activeCellRef.current.col === cursorIndex.col &&
+            activeCellRef.current.row === cursorIndex.row &&
+            !isCellDisabled(activeCellRef.current)
 
           if (clickOnActiveCell && editing) {
             return
@@ -1040,15 +1039,15 @@ export const DataSheetGrid = React.memo(
           }
 
           if (
-            (!(event.shiftKey && activeCell) || rightClick) &&
+            (!(event.shiftKey && activeCellRef.current) || rightClick) &&
             data.length > 0
           ) {
             setActiveCell(
               cursorIndex && {
                 col:
                   (rightClickInSelection || rightClickOnSelectedHeaders) &&
-                  activeCell
-                    ? activeCell.col
+                  activeCellRef.current
+                    ? activeCellRef.current.col
                     : Math.max(
                         0,
                         clickOnStickyRightColumn ? 0 : cursorIndex.col
@@ -1057,16 +1056,16 @@ export const DataSheetGrid = React.memo(
                   (rightClickInSelection ||
                     rightClickOnSelectedGutter ||
                     clickOnSelectedStickyRightColumn) &&
-                  activeCell
-                    ? activeCell.row
+                  activeCellRef.current
+                    ? activeCellRef.current.row
                     : Math.max(0, cursorIndex.row),
                 doNotScrollX: Boolean(
-                  (rightClickInSelection && activeCell) ||
+                  (rightClickInSelection && activeCellRef.current) ||
                     clickOnStickyRightColumn ||
                     cursorIndex.col === -1
                 ),
                 doNotScrollY: Boolean(
-                  (rightClickInSelection && activeCell) ||
+                  (rightClickInSelection && activeCellRef.current) ||
                     cursorIndex.row === -1
                 ),
               }
@@ -1074,10 +1073,12 @@ export const DataSheetGrid = React.memo(
           }
 
           if (clickOnActiveCell && !rightClick) {
-            lastEditingCellRef.current = activeCell
+            lastEditingCellRef.current = activeCellRef.current
           }
 
-          const activeCol = activeCell ? columns[activeCell?.col + 1] : null
+          const activeCol = activeCellRef.current
+            ? columns[activeCellRef.current?.col + 1]
+            : null
           setEditing(
             Boolean(
               clickOnActiveCell && !rightClick && !activeCol?.disableEditing
@@ -1088,10 +1089,10 @@ export const DataSheetGrid = React.memo(
               ? {
                   columns:
                     (cursorIndex.col !== -1 && !clickOnStickyRightColumn) ||
-                    Boolean(event.shiftKey && activeCell),
+                    Boolean(event.shiftKey && activeCellRef.current),
                   rows:
                     cursorIndex.row !== -1 ||
-                    Boolean(event.shiftKey && activeCell),
+                    Boolean(event.shiftKey && activeCellRef.current),
                   active: true,
                 }
               : {
@@ -1101,7 +1102,7 @@ export const DataSheetGrid = React.memo(
                 }
           )
 
-          if (event.shiftKey && activeCell && !rightClick) {
+          if (event.shiftKey && activeCellRef.current && !rightClick) {
             setSelectionCell(
               cursorIndex && {
                 col: Math.max(
@@ -1162,17 +1163,16 @@ export const DataSheetGrid = React.memo(
           contextMenuItems.length,
           getCursorIndex,
           editing,
-          activeCell,
           columns,
           isCellDisabled,
-          selection,
           hasStickyRightColumn,
+          selection,
           disableContextMenu,
+          data.length,
           setSelectionMode,
           setActiveCell,
           setSelectionCell,
           selectionCell,
-          data.length,
         ]
       )
       useDocumentEventListener('mousedown', onMouseDown)
@@ -1407,7 +1407,7 @@ export const DataSheetGrid = React.memo(
 
       const onKeyDown = useCallback(
         (event: KeyboardEvent) => {
-          if (!activeCell) {
+          if (!activeCellRef.current) {
             return
           }
 
@@ -1420,12 +1420,12 @@ export const DataSheetGrid = React.memo(
           if (
             event.key === 'Tab' &&
             !event.shiftKey &&
-            activeCell.col ===
+            activeCellRef.current.col ===
               columns.length - (hasStickyRightColumn ? 3 : 2) &&
-            !columns[activeCell.col + 1].disableKeys
+            !columns[activeCellRef.current.col + 1].disableKeys
           ) {
             // Last row
-            if (activeCell.row === data.length - 1) {
+            if (activeCellRef.current.row === data.length - 1) {
               if (afterTabIndexRef.current) {
                 event.preventDefault()
 
@@ -1454,11 +1454,11 @@ export const DataSheetGrid = React.memo(
           if (
             event.key === 'Tab' &&
             event.shiftKey &&
-            activeCell.col === 0 &&
-            !columns[activeCell.col + 1].disableKeys
+            activeCellRef.current.col === 0 &&
+            !columns[activeCellRef.current.col + 1].disableKeys
           ) {
             // First row
-            if (activeCell.row === 0) {
+            if (activeCellRef.current.row === 0) {
               if (beforeTabIndexRef.current) {
                 event.preventDefault()
 
@@ -1489,7 +1489,7 @@ export const DataSheetGrid = React.memo(
           }
 
           if (event.key?.startsWith('Arrow') || event.key === 'Tab') {
-            if (editing && columns[activeCell.col + 1].disableKeys) {
+            if (editing && columns[activeCellRef.current.col + 1].disableKeys) {
               return
             }
 
@@ -1530,7 +1530,9 @@ export const DataSheetGrid = React.memo(
               }
 
               if (event.shiftKey) {
-                setSelectionCell((cell) => add(direction, cell || activeCell))
+                setSelectionCell((cell) =>
+                  add(direction, cell || activeCellRef.current)
+                )
               } else {
                 setActiveCell((cell) => add(direction, cell))
                 setSelectionCell(null)
@@ -1556,14 +1558,14 @@ export const DataSheetGrid = React.memo(
             setSelectionCell(null)
 
             if (editing) {
-              if (!columns[activeCell.col + 1].disableKeys) {
+              if (!columns[activeCellRef.current.col + 1].disableKeys) {
                 stopEditing()
                 event.preventDefault()
               }
-            } else if (!isCellDisabled(activeCell)) {
-              lastEditingCellRef.current = activeCell
+            } else if (!isCellDisabled(activeCellRef.current)) {
+              lastEditingCellRef.current = activeCellRef.current
               setEditing(true)
-              scrollTo(activeCell)
+              scrollTo(activeCellRef.current)
               event.preventDefault()
             }
           } else if (
@@ -1573,7 +1575,7 @@ export const DataSheetGrid = React.memo(
             !event.altKey &&
             event.shiftKey
           ) {
-            insertRowAfter(selection?.max.row || activeCell.row)
+            insertRowAfter(selection?.max.row || activeCellRef.current.row)
           } else if (
             event.key === 'd' &&
             (event.ctrlKey || event.metaKey) &&
@@ -1581,7 +1583,7 @@ export const DataSheetGrid = React.memo(
             !event.shiftKey
           ) {
             duplicateRows(
-              selection?.min.row || activeCell.row,
+              selection?.min.row || activeCellRef.current.row,
               selection?.max.row
             )
             event.preventDefault()
@@ -1591,11 +1593,11 @@ export const DataSheetGrid = React.memo(
             !event.metaKey &&
             !event.altKey
           ) {
-            if (!editing && !isCellDisabled(activeCell)) {
-              lastEditingCellRef.current = activeCell
+            if (!editing && !isCellDisabled(activeCellRef.current)) {
+              lastEditingCellRef.current = activeCellRef.current
               setSelectionCell(null)
               setEditing(true)
-              scrollTo(activeCell)
+              scrollTo(activeCellRef.current)
             }
           } else if (['Backspace', 'Delete'].includes(event.key)) {
             if (!editing) {
@@ -1620,16 +1622,15 @@ export const DataSheetGrid = React.memo(
             }
           }
 
-          const activeColumn = columns[activeCell.col + 1]
+          const activeColumn = columns[activeCellRef.current.col + 1]
           onCellKeyDown(
-            getRowId(activeCell.row),
-            activeColumn.id ?? (activeCell.col + 1).toString(),
+            getRowId(activeCellRef.current.row),
+            activeColumn.id ?? (activeCellRef.current.col + 1).toString(),
             event as unknown as React.KeyboardEvent,
-            activeCell.row === selection?.max.row
+            activeCellRef.current.row === selection?.max.row
           )
         },
         [
-          activeCell,
           columns,
           hasStickyRightColumn,
           onCellKeyDown,
@@ -1662,16 +1663,16 @@ export const DataSheetGrid = React.memo(
 
           const clickOnActiveCell =
             cursorIndex &&
-            activeCell &&
-            activeCell.col === cursorIndex.col &&
-            activeCell.row === cursorIndex.row &&
+            activeCellRef.current &&
+            activeCellRef.current.col === cursorIndex.col &&
+            activeCellRef.current.row === cursorIndex.row &&
             editing
 
           if (clickInside && !clickOnActiveCell) {
             event.preventDefault()
           }
         },
-        [getCursorIndex, activeCell, editing]
+        [getCursorIndex, editing]
       )
       useDocumentEventListener('contextmenu', onContextMenu)
 
