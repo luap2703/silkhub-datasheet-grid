@@ -15,6 +15,7 @@
   --dsg-expand-rows-indicator-width: 10px;
   --dsg-scroll-shadow-width: 7px;
   --dsg-scroll-shadow-color: rgba(0, 0, 0, 0.2);
+  --dsg-row-selction-background-color: rgba(69, 128, 230, 0.04);
 }
 
 .dsg-container {
@@ -25,7 +26,7 @@
   user-select: none;
   box-sizing: border-box;
   color: black;
-  background: white;
+  background-color: white;
   position: relative;
   width: 100%;
   overflow: auto;
@@ -45,7 +46,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  background: var(--dsg-cell-background-color);
+  background-color: var(--dsg-cell-background-color);
   box-shadow: 0 1px var(--dsg-border-color) inset;
 }
 
@@ -59,7 +60,7 @@
   display: flex;
   align-items: center;
   box-sizing: border-box;
-  background: var(--dsg-cell-background-color);
+  background-color: var(--dsg-cell-background-color);
   border: solid 1px var(--dsg-border-color);
   border-bottom: none;
   border-right: none;
@@ -82,7 +83,7 @@
 }
 
 .dsg-cell-disabled {
-  background: var(--dsg-cell-disabled-background-color);
+  background-color: var(--dsg-cell-disabled-background-color);
 }
 
 .dsg-cell-header,
@@ -119,6 +120,10 @@
   color: var(--dsg-header-active-text-color);
 }
 
+.dsg-row-selected {
+  background-color: var(--dsg-row-selction-background-color);
+}
+
 .dsg-active-cell,
 .dsg-selection-rect {
   position: absolute;
@@ -141,11 +146,11 @@
 }
 
 .dsg-selection-rect {
-  background: var(--dsg-selection-background-color);
+  background-color: var(--dsg-selection-background-color);
 }
 
 .dsg-selection-rect-disabled {
-  background: var(--dsg-selection-disabled-background-color);
+  background-color: var(--dsg-selection-disabled-background-color);
 }
 
 .dsg-scrollable-view-container {
@@ -408,7 +413,7 @@
 }
 
 .dsg-selection-col-marker {
-  background: var(--dsg-selection-border-color);
+  background-color: var(--dsg-selection-border-color);
   position: sticky;
   width: 100%;
   height: var(--dsg-selection-border-width);
@@ -420,7 +425,7 @@
 }
 
 .dsg-selection-row-marker {
-  background: var(--dsg-selection-border-color);
+  background-color: var(--dsg-selection-border-color);
   position: sticky;
   height: 100%;
   width: var(--dsg-selection-border-width);
@@ -437,11 +442,11 @@
 
 .dsg-selection-col-marker-disabled,
 .dsg-selection-row-marker-disabled {
-  background: var(--dsg-selection-disabled-border-color);
+  background-color: var(--dsg-selection-disabled-border-color);
 }
 
 .dsg-add-row {
-  background: #fafafa;
+  background-color: #fafafa;
   border: 1px solid var(--dsg-border-color);
   border-top: none;
   padding: 7px 10px;
@@ -456,7 +461,7 @@
 
 .dsg-add-row-btn,
 .dsg-add-row-input {
-  background: white;
+  background-color: white;
   padding: 7px 10px;
   display: flex;
   align-items: center;
@@ -485,7 +490,7 @@
   content: '';
   display: inline-block;
   margin-right: 10px;
-  background: #9da6ab;
+  background-color: #9da6ab;
   width: 10px;
   height: 2px;
 }
@@ -496,7 +501,7 @@
   position: absolute;
   left: 14px;
   margin-right: 10px;
-  background: #9da6ab;
+  background-color: #9da6ab;
   width: 2px;
   height: 10px;
 }
@@ -508,7 +513,7 @@
   min-width: 0;
   align-self: stretch;
   box-sizing: border-box;
-  background: none;
+  background-color: none;
   padding: 0 10px;
   font-size: 1rem;
   outline: none;
@@ -524,8 +529,8 @@
   text-align: right;
 }
 
-.dsg-hide-date-picker[type="date"]::-webkit-inner-spin-button,
-.dsg-hide-date-picker[type="date"]::-webkit-calendar-picker-indicator {
+.dsg-hide-date-picker[type='date']::-webkit-inner-spin-button,
+.dsg-hide-date-picker[type='date']::-webkit-calendar-picker-indicator {
   display: none;
   -webkit-appearance: none;
 }
@@ -536,7 +541,7 @@
 
 .dsg-context-menu {
   position: fixed;
-  background: white;
+  background-color: white;
   z-index: 10000;
   border-radius: 4px;
   box-shadow: 0 2px 6px 2px rgba(60, 64, 67, 0.15);
@@ -550,11 +555,11 @@
 }
 
 .dsg-context-menu-item:hover {
-  background: #fafafa;
+  background-color: #fafafa;
 }
 
 .dsg-expand-rows-indicator {
-  background: var(--dsg-cell-background-color);
+  background-color: var(--dsg-cell-background-color);
   border: solid 1px var(--dsg-selection-border-color);
   box-shadow: 0 0 0 1px var(--dsg-cell-background-color);
   width: var(--dsg-expand-rows-indicator-width);
@@ -575,5 +580,5 @@
   box-sizing: border-box;
   transition: all var(--dsg-transition-duration);
   pointer-events: none;
-  background: rgba(0, 0, 0, 0.03);
+  background-color: rgba(0, 0, 0, 0.03);
 }
