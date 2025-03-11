@@ -171,7 +171,8 @@ export const Grid = <T extends any>({
   return (
     <div
       ref={outerRef}
-      className="dsg-container"
+      className={cx('dsg-container')}
+      data-state={loading ? 'loading' : 'loaded'}
       onScroll={onScroll}
       style={{ height: displayHeight }}
     >

@@ -97,7 +97,7 @@ export const DataSheetGrid = React.memo(
 
         loading = false,
         loadingRowComponent = null,
-        loadingRowCount,
+        loadingRowCount = 10,
         loadingRowHeight,
 
         rowSelection,
@@ -114,7 +114,7 @@ export const DataSheetGrid = React.memo(
       const beforeTabIndexRef = useRef<HTMLDivElement>(null)
       const afterTabIndexRef = useRef<HTMLDivElement>(null)
 
-      const { selectedRows, handleRowSelection, selectRows } = useRowSelection(
+      const { selectedRows, selectRows } = useRowSelection(
         rowSelection,
         onRowSelectionChange
       )
@@ -1975,7 +1975,7 @@ export const DataSheetGrid = React.memo(
               headerRowHeight={headerRowHeight}
               rowHeight={getRowSize}
               hasStickyRightColumn={hasStickyRightColumn}
-              dataLength={data.length}
+              dataLength={loading ? loadingRowCount : data.length}
               viewHeight={height}
               viewWidth={width}
               contentWidth={fullWidth ? undefined : contentWidth}
