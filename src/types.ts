@@ -202,6 +202,7 @@ export type DataSheetGridProps<T> = {
   onScroll?: React.UIEventHandler<HTMLDivElement> | undefined
 
   loading?: boolean
+  enforceLoading?: boolean
   loadingRowCount?: number
   loadingRowHeight?: number
   loadingRowComponent?: ReactNode

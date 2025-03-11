@@ -100,11 +100,17 @@ export const DataSheetGrid = React.memo(
         loadingRowCount = 10,
         loadingRowHeight,
 
+        enforceLoading = false,
+
         rowSelection,
         onRowSelectionChange,
       }: DataSheetGridProps<T>,
       ref: React.ForwardedRef<DataSheetGridRef>
     ): JSX.Element => {
+      if (!enforceLoading) {
+        loading = loading && data.length === 0
+      }
+
       const lastEditingCellRef = useRef<Cell | null>(null)
       const disableContextMenu = disableContextMenuRaw || lockRows
       const columns = useColumns(rawColumns, gutterColumn, stickyRightColumn)

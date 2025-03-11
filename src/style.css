@@ -15,7 +15,7 @@
   --dsg-expand-rows-indicator-width: 10px;
   --dsg-scroll-shadow-width: 7px;
   --dsg-scroll-shadow-color: rgba(0, 0, 0, 0.2);
-  --dsg-row-selction-background-color: rgba(69, 128, 230, 0.04);
+  --dsg-row-selection-background-color: rgba(69, 128, 230, 0.04);
 }
 
 .dsg-container {
@@ -121,7 +121,7 @@
 }
 
 .dsg-row-selected {
-  background-color: var(--dsg-row-selction-background-color);
+  background-color: var(--dsg-row-selection-background-color);
 }
 
 .dsg-active-cell,
