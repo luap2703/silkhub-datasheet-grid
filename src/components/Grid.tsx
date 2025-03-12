@@ -19,6 +19,7 @@ export const Grid = <T extends any>({
   innerRef,
   columnWidths,
   hasStickyRightColumn,
+  hasStickyLeftColumn,
   displayHeight,
   headerRowHeight,
   rowHeight,
@@ -58,6 +59,7 @@ export const Grid = <T extends any>({
   innerRef: RefObject<HTMLDivElement>
   columnWidths?: number[]
   hasStickyRightColumn: boolean
+  hasStickyLeftColumn: boolean
   displayHeight: number
   headerRowHeight: number
   rowHeight: (index: number) => { height: number }
@@ -133,17 +135,50 @@ export const Grid = <T extends any>({
     horizontal: true,
     getItemKey: (index: number): React.Key => columns[index].id ?? index,
     overscan: 1,
+
     rangeExtractor: (range) => {
-      const result = defaultRangeExtractor(range)
+      let result = defaultRangeExtractor(range)
+
+      // Make sure all left sticky columns are included
+      if (hasStickyLeftColumn) {
+        const leftColumns: number[] = []
+
+        for (let i = 0; i < columns.length; i++) {
+          if (columns[i].sticky !== 'left') {
+            break
+          }
+
+          leftColumns.push(i)
+        }
+
+        // Now remove any left column from result to then add them back in the correct order
+        result = result.filter((i) => !leftColumns.includes(i))
+
+        result = [...leftColumns, ...result]
+      }
+
       if (result[0] !== 0) {
         result.unshift(0)
       }
-      if (
-        hasStickyRightColumn &&
-        result[result.length - 1] !== columns.length - 1
-      ) {
-        result.push(columns.length - 1)
+
+      // Make sure all right sticky columns are included
+      if (hasStickyRightColumn) {
+        const rightColumns: number[] = []
+
+        for (let i = columns.length - 1; i >= 0; i--) {
+          if (columns[i].sticky !== 'right') {
+            break
+          }
+
+          rightColumns.push(i)
+        }
+
+        // Now remove any right column from result to then add them back in the correct order
+        result = result.filter((i) => !rightColumns.includes(i))
+
+        result = [...result, ...rightColumns]
       }
+
       return result
     },
   })
@@ -206,6 +241,9 @@ export const Grid = <T extends any>({
                   : () => columns[col.index].title as any
                 : () => <></>
 
+              const isStickyLeft =
+                hasStickyLeftColumn && columns[col.index].sticky === 'left'
+
               return (
                 <CellComponent
                   key={col.key}
@@ -218,6 +256,12 @@ export const Grid = <T extends any>({
                   padding={
                     !columns[col.index].disablePadding && col.index !== 0
                   }
+                  stickyLeft={isStickyLeft}
+                  style={{
+                    transform: isStickyLeft
+                      ? `translateY(${-(col.index - 1) * headerRowHeight}px)`
+                      : undefined,
+                  }}
                   className={cx(
                     'dsg-cell-header',
                     selectionColMin !== undefined &&
@@ -285,6 +329,9 @@ export const Grid = <T extends any>({
                   activeCell?.row === row.index &&
                   activeCell.col === col.index - 1
 
+                const isStickyLeft =
+                  hasStickyLeftColumn && columns[col.index].sticky === 'left'
+
                 return (
                   <CellComponent
                     key={col.key}
@@ -292,6 +339,12 @@ export const Grid = <T extends any>({
                     stickyRight={
                       hasStickyRightColumn && col.index === columns.length - 1
                     }
+                    stickyLeft={isStickyLeft}
+                    style={{
+                      transform: isStickyLeft
+                        ? `translateY(${-(col.index - 1) * row.size}px)`
+                        : undefined,
+                    }}
                     active={col.index === 0 && rowActive}
                     disabled={cellDisabled}
                     padding={

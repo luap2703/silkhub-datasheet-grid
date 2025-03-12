@@ -72,11 +72,18 @@ export const parseFlexValue = (value: string | number) => {
 
 export const useColumns = <T extends any>(
   columns: Partial<Column<T, any, any>>[],
-  gutterColumn?: SimpleColumn<T, any> | false,
-  stickyRightColumn?: SimpleColumn<T, any>
+  gutterColumn?: SimpleColumn<T, any> | false
 ): Column<T, any, any>[] => {
   return useMemo<Column<T, any, any>[]>(() => {
-    const partialColumns: Partial<Column<T, any, any>>[] = [
+    const visibleColumns = columns.filter((column) => !column.hidden)
+    const rightStickyColumns = visibleColumns.filter(
+      (column) => column.sticky === 'right'
+    )
+    const leftStickyColumns = visibleColumns.filter(
+      (column) => column.sticky === 'left'
+    )
+
+    const _gutterColumn: Partial<Column<T, any, any>> =
       gutterColumn === false
         ? {
             basis: 0,
@@ -89,6 +96,8 @@ export const useColumns = <T extends any>(
             cellClassName: 'dsg-hidden-cell',
             isCellEmpty: cellAlwaysEmpty,
             disablePadding: true,
+
+            sticky: leftStickyColumns.length ? 'left' : undefined,
           }
         : {
             ...gutterColumn,
@@ -102,20 +111,40 @@ export const useColumns = <T extends any>(
             disablePadding: true,
             component: gutterColumn?.component ?? defaultGutterComponent,
             isCellEmpty: cellAlwaysEmpty,
-          },
-      ...columns,
-    ]
 
-    if (stickyRightColumn) {
-      partialColumns.push({
-        ...stickyRightColumn,
-        basis: stickyRightColumn?.basis ?? 40,
-        grow: stickyRightColumn?.grow ?? 0,
-        shrink: stickyRightColumn?.shrink ?? 0,
-        minWidth: stickyRightColumn.minWidth ?? 0,
-        isCellEmpty: cellAlwaysEmpty,
-      })
+            sticky: leftStickyColumns.length ? 'left' : undefined,
+          }
+
+    const partialColumns: Partial<Column<T, any, any>>[] =
+      visibleColumns.filter((column) => column.sticky === undefined)
+
+    if (rightStickyColumns) {
+      partialColumns.push(
+        ...rightStickyColumns.map((column) => ({
+          ...column,
+          basis: column.basis ?? column.minWidth ?? 40,
+          grow: column.grow ?? 0,
+          shrink: column.shrink ?? 0,
+          minWidth: column.minWidth ?? 0,
+          isCellEmpty: cellAlwaysEmpty,
+        }))
+      )
     }
+
+    if (leftStickyColumns) {
+      partialColumns.unshift(
+        ...leftStickyColumns.map((column) => ({
+          ...column,
+          basis: column.basis ?? 40,
+          grow: column.grow ?? 0,
+          shrink: column.shrink ?? 0,
+          minWidth: column.minWidth ?? 0,
+          isCellEmpty: cellAlwaysEmpty,
+        }))
+      )
+    }
+
+    partialColumns.unshift(_gutterColumn)
 
     return partialColumns.map<Column<T, any, any>>((column) => {
       const legacyWidth =
@@ -146,5 +175,5 @@ export const useColumns = <T extends any>(
         disablePadding: column.disablePadding ?? false,
       }
     })
-  }, [gutterColumn, stickyRightColumn, columns])
+  }, [gutterColumn, columns])
 }

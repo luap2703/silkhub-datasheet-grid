@@ -82,7 +82,17 @@
   transform: translateY(-100%);
 }
 
+.dsg-cell-sticky-left {
+  position: sticky;
+  z-index: 2;
+}
+
 .dsg-cell-padding {
+  padding: 0 8px;
+}
+
+.dsg-cell-padding,
+.dsg-cell-sticky-left {
   padding: 0 8px;
 }
 

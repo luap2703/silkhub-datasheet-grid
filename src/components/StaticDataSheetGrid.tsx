@@ -12,7 +12,6 @@ export const StaticDataSheetGrid = React.forwardRef<
     {
       columns,
       gutterColumn,
-      stickyRightColumn,
       addRowsComponent,
       createRow,
       duplicateRow,
@@ -31,7 +30,6 @@ export const StaticDataSheetGrid = React.forwardRef<
     const [staticProps] = useState({
       columns,
       gutterColumn,
-      stickyRightColumn,
       addRowsComponent,
       createRow,
       duplicateRow,

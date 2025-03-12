@@ -92,6 +92,9 @@ export type Column<T, C, PasteValue> = {
   disableEditing: boolean
 
   disablePadding: boolean
+
+  sticky?: 'left' | 'right'
+  hidden?: boolean
 }
 
 export type SelectionContextType = {
@@ -102,6 +105,7 @@ export type SelectionContextType = {
   dataLength: number
   rowHeight: (index: number) => { height: number; top: number }
   hasStickyRightColumn: boolean
+  hasStickyLeftColumn: boolean
   editing: boolean
   isCellDisabled: (cell: Cell) => boolean
   headerRowHeight: number
@@ -179,7 +183,7 @@ export type DataSheetGridProps<T> = {
   onChange?: (value: T[], operations: Operation[]) => void
   columns?: Partial<Column<T, any, any>>[]
   gutterColumn?: SimpleColumn<T, any> | false
-  stickyRightColumn?: SimpleColumn<T, any>
+
   rowKey?: string | ((opts: { rowData: T; rowIndex: number }) => string)
   height?: number
   rowHeight?: number | ((opt: { rowData: T; rowIndex: number }) => number)

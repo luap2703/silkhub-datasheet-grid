@@ -74,7 +74,7 @@ export const DataSheetGrid = React.memo(
         rowHeight = 40,
         headerRowHeight = typeof rowHeight === 'number' ? rowHeight : 40,
         gutterColumn,
-        stickyRightColumn,
+
         rowKey,
         addRowsComponent: AddRowsComponent = (props) => <AddRows {...props} />,
         createRow = DEFAULT_CREATE_ROW as () => T,
@@ -113,8 +113,17 @@ export const DataSheetGrid = React.memo(
 
       const lastEditingCellRef = useRef<Cell | null>(null)
       const disableContextMenu = disableContextMenuRaw || lockRows
-      const columns = useColumns(rawColumns, gutterColumn, stickyRightColumn)
-      const hasStickyRightColumn = Boolean(stickyRightColumn)
+      const columns = useColumns(rawColumns, gutterColumn)
+      const { hasStickyRightColumn, hasStickyLeftColumn } = useMemo(() => {
+        return columns.reduce(
+          (acc, column) => {
+            if (column.sticky === 'right') acc.hasStickyRightColumn = true
+            if (column.sticky === 'left') acc.hasStickyLeftColumn = true
+            return acc
+          },
+          { hasStickyRightColumn: false, hasStickyLeftColumn: false }
+        )
+      }, [columns])
       const innerRef = useRef<HTMLDivElement>(null)
       const outerRef = useRef<HTMLDivElement>(null)
       const beforeTabIndexRef = useRef<HTMLDivElement>(null)
@@ -1943,6 +1952,7 @@ export const DataSheetGrid = React.memo(
             outerRef={outerRef}
             columnWidths={columnWidths}
             hasStickyRightColumn={hasStickyRightColumn}
+            hasStickyLeftColumn={hasStickyLeftColumn}
             displayHeight={displayHeight}
             data={data}
             fullWidth={fullWidth}
@@ -1981,6 +1991,7 @@ export const DataSheetGrid = React.memo(
               headerRowHeight={headerRowHeight}
               rowHeight={getRowSize}
               hasStickyRightColumn={hasStickyRightColumn}
+              hasStickyLeftColumn={hasStickyLeftColumn}
               dataLength={loading ? loadingRowCount : data.length}
               viewHeight={height}
               viewWidth={width}
