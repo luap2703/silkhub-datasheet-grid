@@ -10,6 +10,7 @@ export const Cell: FC<{
   children?: any
   width: number
   left: number
+  padding?: boolean
 }> = ({
   children,
   gutter,
@@ -19,6 +20,7 @@ export const Cell: FC<{
   className,
   width,
   left,
+  padding,
 }) => {
   return (
     <div
@@ -29,6 +31,7 @@ export const Cell: FC<{
         disabled && 'dsg-cell-disabled',
         gutter && active && 'dsg-cell-gutter-active',
         stickyRight && 'dsg-cell-sticky-right',
+        padding && 'dsg-cell-padding',
         className
       )}
       style={{

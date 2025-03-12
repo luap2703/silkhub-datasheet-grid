@@ -215,6 +215,9 @@ export const Grid = <T extends any>({
                   }
                   width={col.size}
                   left={col.start}
+                  padding={
+                    !columns[col.index].disablePadding && col.index !== 0
+                  }
                   className={cx(
                     'dsg-cell-header',
                     selectionColMin !== undefined &&
@@ -291,6 +294,9 @@ export const Grid = <T extends any>({
                     }
                     active={col.index === 0 && rowActive}
                     disabled={cellDisabled}
+                    padding={
+                      !columns[col.index].disablePadding && col.index !== 0
+                    }
                     className={cx(
                       !loading
                         ? typeof colCellClassName === 'function' // Disable when loading to prevent any special behavior for loading view

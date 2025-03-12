@@ -82,6 +82,10 @@
   transform: translateY(-100%);
 }
 
+.dsg-cell-padding {
+  padding: 0 8px;
+}
+
 .dsg-cell-disabled {
   background-color: var(--dsg-cell-disabled-background-color);
 }
@@ -94,7 +98,6 @@
 }
 
 .dsg-cell-header-container {
-  padding: 0 10px;
   line-height: 15px;
 }
 

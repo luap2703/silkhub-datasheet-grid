@@ -88,6 +88,7 @@ export const useColumns = <T extends any>(
             headerClassName: 'dsg-hidden-cell',
             cellClassName: 'dsg-hidden-cell',
             isCellEmpty: cellAlwaysEmpty,
+            disablePadding: true,
           }
         : {
             ...gutterColumn,
@@ -98,6 +99,7 @@ export const useColumns = <T extends any>(
             title: gutterColumn?.title ?? (
               <div className="dsg-corner-indicator" />
             ),
+            disablePadding: true,
             component: gutterColumn?.component ?? defaultGutterComponent,
             isCellEmpty: cellAlwaysEmpty,
           },
@@ -141,6 +143,7 @@ export const useColumns = <T extends any>(
         prePasteValues: column.prePasteValues ?? defaultPrePasteValues,
         isCellEmpty: column.isCellEmpty ?? defaultIsCellEmpty,
         disableEditing: column.disableEditing ?? false,
+        disablePadding: column.disablePadding ?? false,
       }
     })
   }, [gutterColumn, stickyRightColumn, columns])

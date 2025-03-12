@@ -90,6 +90,8 @@ export type Column<T, C, PasteValue> = {
   ) => void
 
   disableEditing: boolean
+
+  disablePadding: boolean
 }
 
 export type SelectionContextType = {
