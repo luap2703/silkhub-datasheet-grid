@@ -306,11 +306,11 @@ export const Grid = <T extends any>({
                     !columns[col.index].disablePadding && col.index !== 0
                   }
                   stickyLeft={isStickyLeft}
-                  style={{
+                  /*style={{
                     transform: isStickyLeft
                       ? `translateY(${-(col.index - 1) * headerRowHeight}px)`
                       : undefined,
-                  }}
+                  }}*/
                   className={cx(
                     'dsg-cell-header',
                     selectionColMin !== undefined &&
@@ -389,11 +389,11 @@ export const Grid = <T extends any>({
                       hasStickyRightColumn && col.index === columns.length - 1
                     }
                     stickyLeft={isStickyLeft}
-                    style={{
+                    /* style={{
                       transform: isStickyLeft
                         ? `translateY(${-(col.index - 1) * row.size}px)`
                         : undefined,
-                    }}
+                    }}*/
                     active={col.index === 0 && rowActive}
                     disabled={cellDisabled}
                     padding={
