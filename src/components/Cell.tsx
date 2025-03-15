@@ -34,8 +34,8 @@ export const Cell: FC<{
         gutter && 'dsg-cell-gutter',
         disabled && 'dsg-cell-disabled',
         gutter && active && 'dsg-cell-gutter-active',
-        stickyRight && 'dsg-cell-sticky-right',
-        stickyLeft && 'dsg-cell-sticky-left',
+        stickyRight && 'dsg-cell-sticky dsg-cell-sticky-right',
+        stickyLeft && 'dsg-cell-sticky dsg-cell-sticky-left',
         padding && 'dsg-cell-padding',
         className
       )}

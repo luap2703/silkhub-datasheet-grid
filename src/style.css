@@ -432,6 +432,10 @@
   height: var(--dsg-selection-border-width);
 }
 
+.dsg-cell-sticky {
+  z-index: 25;
+}
+
 .dsg-selection-row-marker-container {
   position: absolute;
   left: 0;

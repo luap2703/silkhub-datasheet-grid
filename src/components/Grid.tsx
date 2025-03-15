@@ -1,5 +1,11 @@
 import { defaultRangeExtractor, useVirtualizer } from '@tanstack/react-virtual'
-import React, { ReactNode, RefObject, useEffect, useMemo } from 'react'
+import React, {
+  ReactNode,
+  RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+} from 'react'
 import {
   Cell,
   Column,
@@ -11,6 +17,8 @@ import {
 import cx from 'classnames'
 import { Cell as CellComponent } from './Cell'
 import { useMemoizedIndexCallback } from '../hooks/useMemoizedIndexCallback'
+import { HorizontalScrollShadow } from './HorizontalScrollShadow'
+import { throttle } from 'throttle-debounce'
 
 export const Grid = <T extends any>({
   data,
@@ -202,6 +210,47 @@ export const Grid = <T extends any>({
   const _selectedRows = useMemo(() => {
     return Array.from(selectedRows)
   }, [selectedRows])
+
+  const getStickyLeftColumnWidth = useCallback(() => {
+    if (!hasStickyLeftColumn) {
+      return 0
+    }
+
+    let width = 0
+
+    for (let i = 0; i < columns.length; i++) {
+      if (columns[i].sticky === 'left') {
+        width += columnWidths?.[i] ?? 100
+      } else {
+        break
+      }
+    }
+
+    return width
+  }, [columnWidths, columns, hasStickyLeftColumn])
+
+  const [isHorizontallyScrolled, setIsScrolled] = React.useState(false)
+
+  const handleScroll = useCallback(() => {
+    if (outerRef.current) {
+      const target = outerRef.current
+
+      if (target.scrollLeft > 0.01) {
+        setIsScrolled(true)
+      } else {
+        setIsScrolled(false)
+      }
+    }
+  }, [outerRef])
+
+  useEffect(() => {
+    const throttledScroll = throttle(500, false, handleScroll)
+    const ref = outerRef.current
+    ref?.addEventListener('scroll', throttledScroll)
+    return () => {
+      ref?.removeEventListener('scroll', throttledScroll)
+    }
+  }, [handleScroll, outerRef])
 
   return (
     <div
@@ -404,6 +453,13 @@ export const Grid = <T extends any>({
             </div>
           )
         })}
+
+        <HorizontalScrollShadow
+          hasStickyLeftColumn={hasStickyLeftColumn}
+          getStickyLeftColumnWidth={getStickyLeftColumnWidth}
+          isHorizontallyScrolled={isHorizontallyScrolled}
+        />
+
         {children}
       </div>
     </div>
