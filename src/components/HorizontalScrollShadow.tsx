@@ -4,10 +4,14 @@ export const HorizontalScrollShadow = ({
   hasStickyLeftColumn,
   isHorizontallyScrolled,
   getStickyLeftColumnWidth,
+  displayHeight,
+  headerHeight,
 }: {
   hasStickyLeftColumn: boolean
   isHorizontallyScrolled: boolean
   getStickyLeftColumnWidth: () => number
+  displayHeight: number
+  headerHeight: number
 }) => {
   const left = useMemo(() => {
     return hasStickyLeftColumn ? getStickyLeftColumnWidth() : 0
@@ -23,8 +27,8 @@ export const HorizontalScrollShadow = ({
         backgroundColor: 'transparent',
         color: 'transparent',
         bottom: 0,
-        minHeight: '100%',
-        zIndex: 1,
+        height: displayHeight - headerHeight,
+        zIndex: 25,
         position: 'sticky',
         left: left + 1,
         boxShadow: 'rgba(35, 37, 41, 0.12) 6px 0px 16px 2px',

@@ -48,6 +48,9 @@
   left: 0;
   background-color: var(--dsg-cell-background-color);
   box-shadow: 0 1px var(--dsg-border-color) inset;
+
+  display: flex;
+  flex-direction: row;
 }
 
 .dsg-row-header {

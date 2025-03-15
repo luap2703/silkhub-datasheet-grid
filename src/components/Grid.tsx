@@ -293,6 +293,8 @@ export const Grid = <T extends any>({
               const isStickyLeft =
                 hasStickyLeftColumn && columns[col.index].sticky === 'left'
 
+              if (loading && col.index === 0) return null
+
               return (
                 <CellComponent
                   key={col.key}
@@ -306,11 +308,6 @@ export const Grid = <T extends any>({
                     !columns[col.index].disablePadding && col.index !== 0
                   }
                   stickyLeft={isStickyLeft}
-                  /*style={{
-                    transform: isStickyLeft
-                      ? `translateY(${-(col.index - 1) * headerRowHeight}px)`
-                      : undefined,
-                  }}*/
                   className={cx(
                     'dsg-cell-header',
                     selectionColMin !== undefined &&
@@ -381,6 +378,8 @@ export const Grid = <T extends any>({
                 const isStickyLeft =
                   hasStickyLeftColumn && columns[col.index].sticky === 'left'
 
+                if (loading && col.index === 0) return null
+
                 return (
                   <CellComponent
                     key={col.key}
@@ -389,11 +388,6 @@ export const Grid = <T extends any>({
                       hasStickyRightColumn && col.index === columns.length - 1
                     }
                     stickyLeft={isStickyLeft}
-                    /* style={{
-                      transform: isStickyLeft
-                        ? `translateY(${-(col.index - 1) * row.size}px)`
-                        : undefined,
-                    }}*/
                     active={col.index === 0 && rowActive}
                     disabled={cellDisabled}
                     padding={
@@ -422,7 +416,7 @@ export const Grid = <T extends any>({
                     width={col.size}
                     left={col.start}
                   >
-                    {loading ? (
+                    {loading && col.index !== 0 ? (
                       LoadingComponent
                     ) : (
                       <Component
@@ -454,13 +448,15 @@ export const Grid = <T extends any>({
           )
         })}
 
+        {children}
+
         <HorizontalScrollShadow
           hasStickyLeftColumn={hasStickyLeftColumn}
           getStickyLeftColumnWidth={getStickyLeftColumnWidth}
           isHorizontallyScrolled={isHorizontallyScrolled}
+          displayHeight={rowVirtualizer.getTotalSize()}
+          headerHeight={headerRowHeight}
         />
-
-        {children}
       </div>
     </div>
   )
