@@ -114,6 +114,9 @@ export type SelectionContextType = {
   contentWidth?: number
   edges: { top: boolean; right: boolean; bottom: boolean; left: boolean }
   expandSelection: number | null
+
+  getStickyColumnWidth: (side: 'left' | 'right') => number
+  getStickyColumnMaxIndex: (side: 'left' | 'right') => number | undefined
 }
 
 export type SimpleColumn<T, C> = Partial<

@@ -138,18 +138,18 @@ export const DataSheetGrid = React.memo(
       selectedRowsRef.current = selectedRows
 
       // Default value is 1 for the border
-      const [heightDiff, setHeightDiff] = useDebounceState(1, 100)
+      const [heightDiff, setHeightDiff] = useDebounceState(1, 1000)
 
       const { getRowSize, totalSize, getRowIndex } = useRowHeights({
         value: data,
         rowHeight,
       })
-
+      /*
       // Height of the list (including scrollbars and borders) to display
       const displayHeight = Math.min(
         maxHeight,
         headerRowHeight + totalSize(maxHeight) + heightDiff
-      )
+      )*/
 
       // Width and height of the scrollable area
       const { width, height } = useResizeDetector({
@@ -157,9 +157,10 @@ export const DataSheetGrid = React.memo(
         refreshMode: 'throttle',
         refreshRate: 100,
       })
-
+      /*
       setHeightDiff(height ? displayHeight - height : 0)
-
+    
+      */
       const edges = useEdges(outerRef, width, height)
 
       const {
@@ -1937,6 +1938,57 @@ export const DataSheetGrid = React.memo(
         columns,
       ])
 
+      const getStickyColumnWidth = useCallback(
+        (side: 'left' | 'right') => {
+          if (side === 'right' && !hasStickyRightColumn) {
+            return 0
+          }
+
+          if (side === 'left' && !hasStickyLeftColumn) {
+            return 0
+          }
+
+          let width = 0
+
+          for (let i = 0; i < columns.length; i++) {
+            if (columns[i].sticky === side) {
+              width += columnWidths?.[i] ?? 100
+            }
+          }
+
+          return width
+        },
+        [columnWidths, columns, hasStickyLeftColumn, hasStickyRightColumn]
+      )
+
+      const getStickyColumnMaxIndex = useCallback(
+        (side: 'left' | 'right') => {
+          let index = 0
+
+          if (!hasStickyLeftColumn && side === 'left') return undefined
+          if (!hasStickyRightColumn && side === 'right') return undefined
+
+          if (side === 'left') {
+            for (let i = 0; i < columns.length; i++) {
+              if (columns[i].sticky === 'left') {
+                index = i
+              }
+            }
+
+            return index
+          } else {
+            // Return first right
+            for (let i = columns.length - 1; i >= 0; i--) {
+              if (columns[i].sticky === 'right') {
+                return i
+              }
+            }
+          }
+          return undefined
+        },
+        [columns, hasStickyLeftColumn, hasStickyRightColumn]
+      )
+
       return (
         <div className={className} style={style}>
           <div
@@ -1947,13 +1999,14 @@ export const DataSheetGrid = React.memo(
               setActiveCell({ col: 0, row: 0 })
             }}
           />
+
           <Grid
             columns={columns}
             outerRef={outerRef}
             columnWidths={columnWidths}
             hasStickyRightColumn={hasStickyRightColumn}
             hasStickyLeftColumn={hasStickyLeftColumn}
-            displayHeight={displayHeight}
+            // displayHeight={displayHeight}
             data={data}
             fullWidth={fullWidth}
             headerRowHeight={headerRowHeight}
@@ -1982,6 +2035,7 @@ export const DataSheetGrid = React.memo(
             selectAllRows={selectAllRows}
             getRowId={getRowId}
             table={tableCallbacks.current}
+            getStickyColumnWidth={getStickyColumnWidth}
           >
             <SelectionRect
               columnRights={columnRights}
@@ -2000,6 +2054,8 @@ export const DataSheetGrid = React.memo(
               editing={editing}
               isCellDisabled={isCellDisabled}
               expandSelection={expandSelection}
+              getStickyColumnWidth={getStickyColumnWidth}
+              getStickyColumnMaxIndex={getStickyColumnMaxIndex}
             />
           </Grid>
           <div

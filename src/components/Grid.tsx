@@ -28,7 +28,7 @@ export const Grid = <T extends any>({
   columnWidths,
   hasStickyRightColumn,
   hasStickyLeftColumn,
-  displayHeight,
+  //displayHeight,
   headerRowHeight,
   rowHeight,
   rowKey,
@@ -60,6 +60,8 @@ export const Grid = <T extends any>({
 
   getRowId,
   table,
+
+  getStickyColumnWidth,
 }: {
   data: T[]
   columns: Column<T, any, any>[]
@@ -68,7 +70,7 @@ export const Grid = <T extends any>({
   columnWidths?: number[]
   hasStickyRightColumn: boolean
   hasStickyLeftColumn: boolean
-  displayHeight: number
+  //displayHeight: number
   headerRowHeight: number
   rowHeight: (index: number) => { height: number }
   rowKey: DataSheetGridProps<T>['rowKey']
@@ -101,6 +103,8 @@ export const Grid = <T extends any>({
   selectAllRows: () => void
 
   table: TableCallbackProps
+
+  getStickyColumnWidth: (side: 'left' | 'right') => number
 }) => {
   const LoadingComponent = useMemo(
     () => loadingRowComponent ?? <div>Loading...</div>,
@@ -211,24 +215,6 @@ export const Grid = <T extends any>({
     return Array.from(selectedRows)
   }, [selectedRows])
 
-  const getStickyLeftColumnWidth = useCallback(() => {
-    if (!hasStickyLeftColumn) {
-      return 0
-    }
-
-    let width = 0
-
-    for (let i = 0; i < columns.length; i++) {
-      if (columns[i].sticky === 'left') {
-        width += columnWidths?.[i] ?? 100
-      } else {
-        break
-      }
-    }
-
-    return width
-  }, [columnWidths, columns, hasStickyLeftColumn])
-
   const [isHorizontallyScrolled, setIsScrolled] = React.useState(false)
 
   const handleScroll = useCallback(() => {
@@ -258,7 +244,7 @@ export const Grid = <T extends any>({
       className={cx('dsg-container', 'group/container')}
       data-state={loading ? 'loading' : 'loaded'}
       onScroll={onScroll}
-      style={{ height: displayHeight }}
+      //  style={{ height: displayHeight }}
     >
       <div
         className="group/inner-container"
@@ -452,9 +438,8 @@ export const Grid = <T extends any>({
 
         <HorizontalScrollShadow
           hasStickyLeftColumn={hasStickyLeftColumn}
-          getStickyLeftColumnWidth={getStickyLeftColumnWidth}
+          getStickyColumnWidth={getStickyColumnWidth}
           isHorizontallyScrolled={isHorizontallyScrolled}
-          displayHeight={rowVirtualizer.getTotalSize()}
           headerHeight={headerRowHeight}
         />
       </div>

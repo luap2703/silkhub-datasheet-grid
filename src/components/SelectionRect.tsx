@@ -9,12 +9,36 @@ const buildSquare = (
   left: number | string
 ) => {
   return [
-    [left, top],
     [right, top],
-    [right, bottom],
-    [left, bottom],
     [left, top],
+    [left, bottom],
+    [right, bottom],
+    [right, top],
   ]
+}
+
+const buildThreeSidedClipPath = (
+  top: number,
+  right: number,
+  bottom: number,
+  left: number
+) => {
+  const buildLine = (...points: [number | string, number | string][]) => points
+
+  const values = [
+    ...buildLine([right, top], [left, top]), // Top line
+    ...buildLine([left, top], [left, bottom]), // Left line
+    ...buildLine([left, bottom], [right, bottom]), // Bottom line
+  ]
+
+  return `polygon(${values
+    .map(
+      ([x, y]) =>
+        `${typeof x === 'number' ? x + 'px' : x} ${
+          typeof y === 'number' ? y + 'px' : y
+        }`
+    )
+    .join(', ')})`
 }
 
 const buildClipPath = (
@@ -56,6 +80,8 @@ export const SelectionRect = React.memo<SelectionContextType>(
     isCellDisabled,
     editing,
     expandSelection,
+    getStickyColumnWidth,
+    getStickyColumnMaxIndex,
   }) => {
     const activeCellIsDisabled = activeCell ? isCellDisabled(activeCell) : false
 
@@ -74,6 +100,49 @@ export const SelectionRect = React.memo<SelectionContextType>(
 
       return true
     }, [activeCellIsDisabled, isCellDisabled, selection])
+
+    // If a sticky Column is in selection, we have to increase z-index
+    const isStickySelected = useMemo(() => {
+      if (!columnWidths || (!selection && !activeCell)) return false
+
+      const maxStickyLeft = getStickyColumnMaxIndex('left') ?? 0
+      const maxStickyRight =
+        getStickyColumnMaxIndex('right') ?? columnWidths.length ?? 0 - 1
+
+      const cells = selection
+        ? [selection.min, selection.max]
+        : activeCell
+        ? [activeCell]
+        : []
+
+      const minCol = Math.min(...cells.map((cell) => cell.col))
+      const maxCol = Math.max(...cells.map((cell) => cell.col))
+
+      const isLeftSticky = minCol + 1 <= maxStickyLeft
+      const isRightSticky = maxCol - 1 >= maxStickyRight
+
+      if (isLeftSticky || isRightSticky) {
+        return {
+          left: isLeftSticky,
+          right: isRightSticky,
+        }
+      }
+
+      return false
+    }, [columnWidths, selection, activeCell, getStickyColumnMaxIndex])
+
+    const isActiveCellSticky = useMemo(() => {
+      if (!activeCell) return false
+
+      const maxStickyLeft = getStickyColumnMaxIndex('left') ?? 0
+      const maxStickyRight =
+        getStickyColumnMaxIndex('right') ?? (columnWidths?.length ?? 0) - 1
+
+      return (
+        activeCell.col + 1 <= maxStickyLeft ||
+        activeCell.col - 1 >= maxStickyRight
+      )
+    }, [activeCell, columnWidths?.length, getStickyColumnMaxIndex])
 
     if (!columnWidths || !columnRights) {
       return null
@@ -107,6 +176,28 @@ export const SelectionRect = React.memo<SelectionContextType>(
       left: columnRights[selection.min.col],
       top: rowHeight(selection.min.row).top + headerRowHeight,
     }
+
+    const stickyLeftSelectionRect =
+      selectionRect && isStickySelected && isStickySelected.left
+        ? {
+            ...selectionRect,
+            width:
+              getStickyColumnWidth('left') -
+              columnWidths
+                .slice(0, selection.min.col + 1)
+                .reduce((a, b) => a + b),
+          }
+        : null
+
+    const stickyRightSelectionRect =
+      selectionRect && isStickySelected && isStickySelected.right
+        ? {
+            ...selectionRect,
+            left: getStickyColumnWidth('right'),
+            width:
+              columnRights[selection.max.col] - getStickyColumnWidth('right'),
+          }
+        : null
 
     const minSelection = selection?.min || activeCell
     const maxSelection = selection?.max || activeCell
@@ -233,7 +324,10 @@ export const SelectionRect = React.memo<SelectionContextType>(
               'dsg-active-cell-focus': editing,
               'dsg-active-cell-disabled': activeCellIsDisabled,
             })}
-            style={activeCellRect}
+            style={{
+              ...activeCellRect,
+              zIndex: isActiveCellSticky ? 30 : undefined,
+            }}
           />
         )}
         {selectionRect && activeCellRect && (
@@ -253,6 +347,43 @@ export const SelectionRect = React.memo<SelectionContextType>(
             }}
           />
         )}
+
+        <div
+          className="dsg-selection-sticky-left-rect-container"
+          style={{
+            position: 'static',
+          }}
+        >
+          {stickyLeftSelectionRect && activeCellRect && selectionRect && (
+            <div
+              className={cx(
+                'dsg-selection-sticky-rect',
+                'dsg-selection-sticky-rect-left',
+                selectionIsDisabled && 'dsg-selection-rect-disabled'
+              )}
+              style={{
+                ...stickyLeftSelectionRect,
+                top: undefined,
+                marginTop: stickyLeftSelectionRect.top - headerRowHeight,
+              }}
+            />
+          )}
+          {stickyRightSelectionRect && activeCellRect && selectionRect && (
+            <div
+              className={cx(
+                'dsg-selection-sticky-rect',
+                'dsg-selection-sticky-rect-right',
+                selectionIsDisabled && 'dsg-selection-rect-disabled'
+              )}
+              style={{
+                ...stickyRightSelectionRect,
+                top: undefined,
+                marginTop: stickyRightSelectionRect.top - headerRowHeight,
+              }}
+            />
+          )}
+        </div>
+
         {expandRowsRect && (
           <div className={cx('dsg-expand-rows-rect')} style={expandRowsRect} />
         )}
