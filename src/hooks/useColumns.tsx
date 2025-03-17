@@ -1,5 +1,10 @@
 import React, { useMemo } from 'react'
-import { CellProps, Column, SimpleColumn } from '../types'
+import {
+  CellProps,
+  Column,
+  ColumnVisibilityModel,
+  SimpleColumn,
+} from '../types'
 
 const defaultComponent = () => <></>
 const defaultIsCellEmpty = () => false
@@ -72,10 +77,13 @@ export const parseFlexValue = (value: string | number) => {
 
 export const useColumns = <T extends any>(
   columns: Partial<Column<T, any, any>>[],
-  gutterColumn?: SimpleColumn<T, any> | false
+  gutterColumn?: SimpleColumn<T, any> | false,
+  columnVisibilityModel?: ColumnVisibilityModel
 ): Column<T, any, any>[] => {
   return useMemo<Column<T, any, any>[]>(() => {
-    const visibleColumns = columns.filter((column) => !column.hidden)
+    const visibleColumns = columns.filter(
+      (column) => !column.id || !columnVisibilityModel?.has(column.id)
+    )
     const rightStickyColumns = visibleColumns.filter(
       (column) => column.sticky === 'right'
     )
@@ -175,5 +183,5 @@ export const useColumns = <T extends any>(
         disablePadding: column.disablePadding ?? false,
       }
     })
-  }, [gutterColumn, columns])
+  }, [columns, gutterColumn, columnVisibilityModel])
 }

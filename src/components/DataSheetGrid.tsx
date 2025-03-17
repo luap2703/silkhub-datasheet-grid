@@ -104,6 +104,9 @@ export const DataSheetGrid = React.memo(
 
         rowSelection,
         onRowSelectionChange,
+
+        columnVisibilityModel,
+        onColumnVisibilityChange,
       }: DataSheetGridProps<T>,
       ref: React.ForwardedRef<DataSheetGridRef>
     ): JSX.Element => {
@@ -113,7 +116,13 @@ export const DataSheetGrid = React.memo(
 
       const lastEditingCellRef = useRef<Cell | null>(null)
       const disableContextMenu = disableContextMenuRaw || lockRows
-      const columns = useColumns(rawColumns, gutterColumn)
+
+      const columns = useColumns(
+        rawColumns,
+        gutterColumn,
+        columnVisibilityModel
+      )
+
       const { hasStickyRightColumn, hasStickyLeftColumn } = useMemo(() => {
         return columns.reduce(
           (acc, column) => {

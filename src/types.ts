@@ -94,7 +94,6 @@ export type Column<T, C, PasteValue> = {
   disablePadding: boolean
 
   sticky?: 'left' | 'right'
-  hidden?: boolean
 }
 
 export type SelectionContextType = {
@@ -220,7 +219,15 @@ export type DataSheetGridProps<T> = {
   onRowSelectionChange?:
     | ((rowSelection: string[] | ((prev: string[]) => string[])) => void)
     | undefined
+
+  columnVisibilityModel?: ColumnVisibilityModel
+  onColumnVisibilityChange?: ColumnVisibilityModelChangeHandler
 }
+
+export type ColumnVisibilityModel = Set<string>
+export type ColumnVisibilityModelChangeHandler = (
+  columnVisibilityModel: ColumnVisibilityModel
+) => void
 
 export type CellWithIdInput = {
   col: number | string
