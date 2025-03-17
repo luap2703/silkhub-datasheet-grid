@@ -94,7 +94,13 @@ export type Column<T, C, PasteValue> = {
   disablePadding: boolean
 
   sticky?: 'left' | 'right'
+
+  contextMenuComponent?: ContextMenuType
 }
+
+export type ContextMenuType = (
+  props: ContextMenuComponentProps
+) => React.JSX.Element | null
 
 export type SelectionContextType = {
   columnRights?: number[]

@@ -10,6 +10,7 @@ import {
   Cell,
   CellWithIdInput,
   Column,
+  ContextMenuType,
   ContextMenuItem,
   DataSheetGridProps,
   DataSheetGridRef,
@@ -28,7 +29,7 @@ import { useGetBoundingClientRect } from '../hooks/useGetBoundingClientRect'
 import { AddRows } from './AddRows'
 import { useDebounceState } from '../hooks/useDebounceState'
 import deepEqual from 'fast-deep-equal'
-import { ContextMenu } from './ContextMenu'
+import { ContextMenu as DefaultContextMenu } from './ContextMenu'
 import {
   encodeHtml,
   isPrintableUnicode,
@@ -83,9 +84,7 @@ export const DataSheetGrid = React.memo(
         disableExpandSelection = false,
         disableSmartDelete = false,
         duplicateRow = DEFAULT_DUPLICATE_ROW,
-        contextMenuComponent: ContextMenuComponent = (props) => (
-          <ContextMenu {...props} />
-        ),
+        contextMenuComponent: _ContextMenuComponent,
         disableContextMenu: disableContextMenuRaw = false,
         onFocus = DEFAULT_EMPTY_CALLBACK,
         onBlur = DEFAULT_EMPTY_CALLBACK,
@@ -190,6 +189,22 @@ export const DataSheetGrid = React.memo(
       const [contextMenuItems, setContextMenuItems] = useState<
         ContextMenuItem[]
       >([])
+
+      const ContextMenu: ContextMenuType = useMemo(() => {
+        const col = contextMenu?.cursorIndex.col
+        if (col !== undefined) {
+          const ColMenu = columns[col + 1].contextMenuComponent
+
+          if (ColMenu) {
+            return ColMenu
+          }
+        }
+
+        return (
+          _ContextMenuComponent ??
+          ((props) => <DefaultContextMenu {...props} />)
+        )
+      }, [_ContextMenuComponent, columns, contextMenu?.cursorIndex.col])
 
       // True when the active cell is being edited
       const [editing, setEditing] = useState(false)
@@ -2084,7 +2099,7 @@ export const DataSheetGrid = React.memo(
             />
           )}
           {contextMenu && contextMenuItems.length > 0 && (
-            <ContextMenuComponent
+            <ContextMenu
               clientX={contextMenu.x}
               clientY={contextMenu.y}
               cursorIndex={contextMenu.cursorIndex}
