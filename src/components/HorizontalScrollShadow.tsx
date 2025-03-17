@@ -21,8 +21,8 @@ export const HorizontalScrollShadow = ({
       style={{
         opacity: !!hasStickyLeftColumn && isHorizontallyScrolled ? 100 : 0,
 
-        height: '100%',
-        marginTop: -headerHeight,
+        height: `calc(100% - ${headerHeight}px)`,
+        //  marginTop: -headerHeight,
 
         left: left,
       }}

@@ -47,12 +47,12 @@ export type HeaderCellComponent<C> = (opts: {
   selectRows: SelectRowsHandler
   toggleSelection: ToggleSelectionHandler
   selectAllRows: () => void
-}) => React.ReactNode
+}) => React.JSX.Element
 
 export type Column<T, C, PasteValue> = {
   id?: string
   headerClassName?: string
-  title?: React.ReactNode | HeaderCellComponent<C>
+  title?: HeaderCellComponent<C>
 
   /** @deprecated Use `basis`, `grow`, and `shrink` instead */
   width?: string | number

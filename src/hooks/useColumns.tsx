@@ -105,9 +105,9 @@ export const useColumns = <T extends any>(
             grow: gutterColumn?.grow ?? 0,
             shrink: gutterColumn?.shrink ?? 0,
             minWidth: gutterColumn?.minWidth ?? 0,
-            title: gutterColumn?.title ?? (
-              <div className="dsg-corner-indicator" />
-            ),
+            title:
+              gutterColumn?.title ??
+              (() => <div className="dsg-corner-indicator" />),
             disablePadding: true,
             component: gutterColumn?.component ?? defaultGutterComponent,
             isCellEmpty: cellAlwaysEmpty,
