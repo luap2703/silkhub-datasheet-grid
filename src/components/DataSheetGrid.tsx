@@ -122,6 +122,12 @@ export const DataSheetGrid = React.memo(
         columnVisibilityModel
       )
 
+      const columnVisibilityModelRef = useRef(columnVisibilityModel)
+      columnVisibilityModelRef.current = columnVisibilityModel
+
+      const onColumnVisibilityChangeRef = useRef(onColumnVisibilityChange)
+      onColumnVisibilityChangeRef.current = onColumnVisibilityChange
+
       const { hasStickyRightColumn, hasStickyLeftColumn } = useMemo(() => {
         return columns.reduce(
           (acc, column) => {
@@ -245,6 +251,9 @@ export const DataSheetGrid = React.memo(
           },
         [activeCell, selectionCell]
       )
+
+      const selectionRef = useRef(selection)
+      selectionRef.current = selection
 
       // Behavior of the selection when the user drags the mouse around
       const [selectionMode, setSelectionMode] = useDeepEqualState({
@@ -1910,9 +1919,24 @@ export const DataSheetGrid = React.memo(
       callbacksRef.current.onActiveCellChange = onActiveCellChange
       callbacksRef.current.onSelectionChange = onSelectionChange
 
+      const columnWidthsRef = useRef(columnWidths)
+      columnWidthsRef.current = columnWidths
+
       const tableCallbacks = useRef<TableCallbackProps>({
         setSelection: _setSelection,
         setActiveCell: _setActiveCell,
+        getRowId,
+        getRowData: (rowIndex: number) => dataRef.current[rowIndex],
+
+        getActiveCell: () => activeCellRef.current,
+        getCellSelection: () => selectionRef.current,
+
+        getColumnVisibilityModel: () =>
+          columnVisibilityModelRef.current ?? new Set(),
+        setColumnVisibilityModel:
+          onColumnVisibilityChangeRef.current ?? (() => undefined),
+
+        getColumnWidths: () => columnWidthsRef.current,
       })
 
       tableCallbacks.current.setSelection = _setSelection

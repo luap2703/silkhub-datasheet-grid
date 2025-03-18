@@ -13,6 +13,7 @@ export const Cell: FC<{
   left: number
   padding?: boolean
   style?: CSSProperties
+  interactive?: boolean
 }> = ({
   children,
   gutter,
@@ -25,6 +26,7 @@ export const Cell: FC<{
   left,
   padding,
   style,
+  interactive,
 }) => {
   return (
     <div
@@ -33,6 +35,7 @@ export const Cell: FC<{
         'group/cell',
         gutter && 'dsg-cell-gutter',
         disabled && 'dsg-cell-disabled',
+        !interactive && 'dsg-cell-passive',
         gutter && active && 'dsg-cell-gutter-active',
         stickyRight && 'dsg-cell-sticky dsg-cell-sticky-right',
         stickyLeft && 'dsg-cell-sticky dsg-cell-sticky-left',

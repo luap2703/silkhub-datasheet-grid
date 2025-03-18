@@ -91,6 +91,14 @@ export const keyColumn = <
       { rowData: rowData[key], rowId, columnId, ...props },
       e
     ),
+  interactive:
+    typeof column.interactive === 'function'
+      ? ({ rowData, rowIndex }) => {
+          return typeof column.interactive === 'function'
+            ? column.interactive({ rowData: rowData[key], rowIndex })
+            : column.interactive ?? false
+        }
+      : column.interactive,
 })
 
 // Type as path of TransferInboundFailedEvent

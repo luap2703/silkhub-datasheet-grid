@@ -45,8 +45,9 @@ export type HeaderCellComponent<C> = (opts: {
   columnData: C
   selectedRows: string[]
   selectRows: SelectRowsHandler
-  toggleSelection: ToggleSelectionHandler
   selectAllRows: () => void
+
+  table: TableCallbackProps
 }) => React.JSX.Element
 
 export type Column<T, C, PasteValue> = {
@@ -65,6 +66,7 @@ export type Column<T, C, PasteValue> = {
   columnData?: C
   disableKeys: boolean
   disabled: boolean | ((opt: { rowData: T; rowIndex: number }) => boolean)
+  interactive: boolean | ((opt: { rowData: T; rowIndex: number }) => boolean)
   cellClassName?:
     | string
     | ((opt: {
@@ -261,6 +263,19 @@ export type DataSheetGridRef = {
 }
 
 export type TableCallbackProps = {
+  getCellSelection: () => SelectionWithId | null
   setSelection: (selection: SelectionWithId | null) => void
+
+  getActiveCell: () => CellWithId | null
   setActiveCell: (activeCell: CellWithId | null) => void
+
+  getColumnVisibilityModel: () => ColumnVisibilityModel
+  setColumnVisibilityModel: (
+    columnVisibilityModel: ColumnVisibilityModel
+  ) => void
+
+  getRowId: (rowIndex: number) => React.Key
+  getRowData: (rowIndex: number) => unknown
+
+  getColumnWidths: () => number[] | undefined
 }

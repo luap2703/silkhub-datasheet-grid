@@ -11,6 +11,7 @@ import {
   Column,
   ContextMenuItem,
   DataSheetGridProps,
+  HeaderCellComponent,
   Selection,
   TableCallbackProps,
 } from '../types'
@@ -263,17 +264,11 @@ export const Grid = <T extends any>({
             }}
           >
             {colVirtualizer.getVirtualItems().map((col) => {
-              const Header: React.FC<{
-                columnData: any
-                selectedRows: string[]
-                selectRows: (
-                  rowSelection: string[] | ((prev: string[]) => string[])
-                ) => void
-                selectAllRows: () => void
-              }> = columns[col.index].title
-                ? typeof columns[col.index].title === 'function'
-                  ? (columns[col.index].title as React.FC) // Ensure it's treated as a functional component
-                  : () => columns[col.index].title as any
+              const title = columns[col.index].title
+              const Header: HeaderCellComponent<T> = title
+                ? typeof title === 'function'
+                  ? title
+                  : () => title
                 : () => <></>
 
               const isStickyLeft =
@@ -310,6 +305,7 @@ export const Grid = <T extends any>({
                       selectedRows={_selectedRows}
                       selectRows={selectRows}
                       selectAllRows={selectAllRows}
+                      table={table}
                     />
                   </div>
                 </CellComponent>
@@ -357,6 +353,16 @@ export const Grid = <T extends any>({
                       rowData: data[row.index],
                       rowIndex: row.index,
                     }))
+
+                const interactive = columns[col.index].interactive
+                const cellInteractive =
+                  interactive === true ||
+                  (typeof interactive === 'function' &&
+                    interactive({
+                      rowData: data[row.index],
+                      rowIndex: row.index,
+                    }))
+
                 const cellIsActive =
                   activeCell?.row === row.index &&
                   activeCell.col === col.index - 1
@@ -376,6 +382,7 @@ export const Grid = <T extends any>({
                     stickyLeft={isStickyLeft}
                     active={col.index === 0 && rowActive}
                     disabled={cellDisabled}
+                    interactive={cellInteractive}
                     padding={
                       !columns[col.index].disablePadding && col.index !== 0
                     }

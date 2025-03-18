@@ -181,6 +181,7 @@ export const useColumns = <T extends any>(
         isCellEmpty: column.isCellEmpty ?? defaultIsCellEmpty,
         disableEditing: column.disableEditing ?? true,
         disablePadding: column.disablePadding ?? false,
+        interactive: column.interactive ?? false,
       }
     })
   }, [columns, gutterColumn, columnVisibilityModel])
