@@ -17,6 +17,8 @@
   --dsg-scroll-shadow-width: 7px;
   --dsg-scroll-shadow-color: rgba(0, 0, 0, 0.2);
   --dsg-row-selection-background-color: rgba(69, 128, 230, 0.04);
+
+  --dsg-selection-passive-border-color: #9da6ab;
 }
 
 .dsg-container {
@@ -166,6 +168,10 @@
 .dsg-active-cell-disabled,
 .dsg-selection-rect-disabled {
   border-color: var(--dsg-selection-disabled-border-color);
+}
+
+.dsg-active-cell-passive {
+  border-color: var(--dsg-selection-passive-border-color);
 }
 
 .dsg-selection-rect {

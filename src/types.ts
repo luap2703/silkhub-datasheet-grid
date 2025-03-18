@@ -115,6 +115,7 @@ export type SelectionContextType = {
   hasStickyLeftColumn: boolean
   editing: boolean
   isCellDisabled: (cell: Cell) => boolean
+  isCellInteractive: (cell: Cell) => boolean
   headerRowHeight: number
   viewWidth?: number
   viewHeight?: number

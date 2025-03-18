@@ -78,12 +78,16 @@ export const SelectionRect = React.memo<SelectionContextType>(
     contentWidth,
     edges,
     isCellDisabled,
+    isCellInteractive,
     editing,
     expandSelection,
     getStickyColumnWidth,
     getStickyColumnMaxIndex,
   }) => {
     const activeCellIsDisabled = activeCell ? isCellDisabled(activeCell) : false
+    const activeCellIsInteractive = activeCell
+      ? isCellInteractive(activeCell)
+      : false
 
     const selectionIsDisabled = useMemo(() => {
       if (!selection) {
@@ -341,6 +345,7 @@ export const SelectionRect = React.memo<SelectionContextType>(
             className={cx('dsg-active-cell', {
               'dsg-active-cell-focus': editing,
               'dsg-active-cell-disabled': activeCellIsDisabled,
+              'dsg-active-cell-passive': !activeCellIsInteractive,
             })}
             style={{
               ...activeCellRect,

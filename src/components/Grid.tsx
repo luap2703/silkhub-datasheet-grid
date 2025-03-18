@@ -63,6 +63,8 @@ export const Grid = <T extends any>({
   table,
 
   getStickyColumnWidth,
+
+  heightDiff,
 }: {
   data: T[]
   columns: Column<T, any, any>[]
@@ -96,6 +98,8 @@ export const Grid = <T extends any>({
   loadingRowComponent?: ReactNode
 
   selectedRows: Set<string>
+
+  heightDiff: number
 
   selectRows: (rowSelection: string[] | ((prev: string[]) => string[])) => void
 
@@ -244,6 +248,7 @@ export const Grid = <T extends any>({
       ref={outerRef}
       className={cx('dsg-container', 'group/container')}
       data-state={loading ? 'loading' : 'loaded'}
+      data-aligned={heightDiff > 0 ? 'false' : 'true'}
       onScroll={onScroll}
       //  style={{ height: displayHeight }}
     >

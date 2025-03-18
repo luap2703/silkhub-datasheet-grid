@@ -158,23 +158,22 @@ export const DataSheetGrid = React.memo(
         value: data,
         rowHeight,
       })
-      /*
+
       // Height of the list (including scrollbars and borders) to display
       const displayHeight = Math.min(
         maxHeight,
         headerRowHeight + totalSize(maxHeight) + heightDiff
-      )*/
+      )
 
       // Width and height of the scrollable area
       const { width, height } = useResizeDetector({
         targetRef: outerRef,
         refreshMode: 'throttle',
-        refreshRate: 100,
+        refreshRate: 150,
       })
-      /*
+
       setHeightDiff(height ? displayHeight - height : 0)
-    
-      */
+
       const edges = useEdges(outerRef, width, height)
 
       const {
@@ -366,6 +365,22 @@ export const DataSheetGrid = React.memo(
                   rowIndex: cell.row,
                 })
               : disabled
+          )
+        },
+        [columns]
+      )
+
+      const isCellInteractive = useCallback(
+        (cell: Cell): boolean => {
+          const interactive = columns[cell.col + 1].interactive
+
+          return Boolean(
+            typeof interactive === 'function'
+              ? interactive({
+                  rowData: dataRef.current[cell.row],
+                  rowIndex: cell.row,
+                })
+              : interactive
           )
         },
         [columns]
@@ -2054,7 +2069,7 @@ export const DataSheetGrid = React.memo(
             columnWidths={columnWidths}
             hasStickyRightColumn={hasStickyRightColumn}
             hasStickyLeftColumn={hasStickyLeftColumn}
-            // displayHeight={displayHeight}
+            heightDiff={heightDiff}
             data={data}
             fullWidth={fullWidth}
             headerRowHeight={headerRowHeight}
@@ -2101,6 +2116,7 @@ export const DataSheetGrid = React.memo(
               edges={edges}
               editing={editing}
               isCellDisabled={isCellDisabled}
+              isCellInteractive={isCellInteractive}
               expandSelection={expandSelection}
               getStickyColumnWidth={getStickyColumnWidth}
               getStickyColumnMaxIndex={getStickyColumnMaxIndex}
