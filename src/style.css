@@ -141,8 +141,7 @@
 }
 
 .dsg-active-cell,
-.dsg-selection-rect,
-.dsg-selection-sticky-rect {
+.dsg-selection-rect {
   position: absolute;
 
   border-color: var(--dsg-selection-border-color);
@@ -153,22 +152,6 @@
   transition: all var(--dsg-transition-duration);
   pointer-events: none;
   z-index: 20;
-}
-
-.dsg-selection-sticky-rect {
-  position: sticky;
-  z-index: 30;
-}
-.dsg-selection-sticky-rect-left {
-  border-right: none;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.dsg-selection-sticky-rect-right {
-  border-left: none;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
 }
 
 .dsg-active-cell-focus {
@@ -482,6 +465,35 @@
 .dsg-selection-col-marker-disabled,
 .dsg-selection-row-marker-disabled {
   background-color: var(--dsg-selection-disabled-border-color);
+}
+
+.dsg-selection-rect-sticky-container {
+  position: absolute;
+}
+
+.dsg-selection-rect-sticky-container-left {
+  left: 0;
+}
+
+.dsg-selection-rect-sticky-container-right {
+  right: 0;
+}
+
+.dsg-selection-rect-sticky {
+  position: sticky;
+  z-index: 30;
+  height: 100%;
+}
+.dsg-selection-rect-left-sticky {
+  border-right: none;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.dsg-selection-rect-right-sticky {
+  border-left: none;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
 .dsg-add-row {

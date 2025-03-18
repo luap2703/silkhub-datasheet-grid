@@ -121,10 +121,16 @@ export const SelectionRect = React.memo<SelectionContextType>(
       const isLeftSticky = minCol + 1 <= maxStickyLeft
       const isRightSticky = maxCol - 1 >= maxStickyRight
 
+      // Check if the MAX column is also sticky (left or right)
+      const maxIsAlsoLeft = maxCol + 1 <= maxStickyLeft
+      const maxIsAlsoRight = maxCol - 1 >= maxStickyRight
+
       if (isLeftSticky || isRightSticky) {
         return {
           left: isLeftSticky,
           right: isRightSticky,
+          exclusively:
+            maxIsAlsoLeft === isLeftSticky && maxIsAlsoRight === isRightSticky,
         }
       }
 
@@ -177,8 +183,17 @@ export const SelectionRect = React.memo<SelectionContextType>(
       top: rowHeight(selection.min.row).top + headerRowHeight,
     }
 
+    /**
+     * When using sticky columns, we need to create separate selection rects for the sticky columns.
+     * This is bc the normal selection lays between z-index 20, while sticky columns are z-index 30.
+     * We can't change z-indexes, as selection is scrolling as well, so we need to imiate a non-scrolling
+     * selection for the sticky columns.
+     */
     const stickyLeftSelectionRect =
-      selectionRect && isStickySelected && isStickySelected.left
+      selectionRect &&
+      isStickySelected &&
+      isStickySelected.left &&
+      !isStickySelected.exclusively
         ? {
             ...selectionRect,
             width:
@@ -190,7 +205,10 @@ export const SelectionRect = React.memo<SelectionContextType>(
         : null
 
     const stickyRightSelectionRect =
-      selectionRect && isStickySelected && isStickySelected.right
+      selectionRect &&
+      isStickySelected &&
+      isStickySelected.right &&
+      !isStickySelected.exclusively
         ? {
             ...selectionRect,
             left: getStickyColumnWidth('right'),
@@ -326,7 +344,7 @@ export const SelectionRect = React.memo<SelectionContextType>(
             })}
             style={{
               ...activeCellRect,
-              zIndex: isActiveCellSticky ? 30 : undefined,
+              zIndex: isActiveCellSticky ? 31 : undefined,
             }}
           />
         )}
@@ -338,6 +356,10 @@ export const SelectionRect = React.memo<SelectionContextType>(
             )}
             style={{
               ...selectionRect,
+              zIndex:
+                isStickySelected && isStickySelected.exclusively
+                  ? 30
+                  : undefined,
               clipPath: buildClipPath(
                 activeCellRect.top - selectionRect.top,
                 activeCellRect.left - selectionRect.left,
@@ -349,36 +371,75 @@ export const SelectionRect = React.memo<SelectionContextType>(
         )}
 
         <div
-          className="dsg-selection-sticky-left-rect-container"
+          className="dsg-selection-rect-sticky-container dsg-selection-rect-sticky-container-left"
           style={{
-            position: 'static',
+            height: selectionRect?.height ?? activeCellRect?.height,
+            width: contentWidth ? contentWidth : '100%',
           }}
         >
           {stickyLeftSelectionRect && activeCellRect && selectionRect && (
             <div
               className={cx(
-                'dsg-selection-sticky-rect',
-                'dsg-selection-sticky-rect-left',
+                'dsg-selection-rect',
+                'dsg-selection-rect-sticky',
+                'dsg-selection-rect-left-sticky',
                 selectionIsDisabled && 'dsg-selection-rect-disabled'
               )}
               style={{
                 ...stickyLeftSelectionRect,
                 top: undefined,
+                // Using marginTop here instead of top: value on container. This is necessary to make the animation (when selection from bottom => top) smooth,
+                // Bc it would otherwise jump to the top of the container and then animate downwards, which looks weird
                 marginTop: stickyLeftSelectionRect.top - headerRowHeight,
+                clipPath: isActiveCellSticky
+                  ? buildClipPath(
+                      activeCellRect.top - selectionRect.top,
+                      activeCellRect.left - selectionRect.left,
+                      activeCellRect.top +
+                        activeCellRect.height -
+                        selectionRect.top,
+                      activeCellRect.left +
+                        activeCellRect.width -
+                        selectionRect.left
+                    )
+                  : undefined,
               }}
             />
           )}
+        </div>
+
+        <div
+          className="dsg-selection-rect-sticky-container dsg-selection-rect-sticky-container-right"
+          style={{
+            height: selectionRect?.height ?? activeCellRect?.height,
+            width: contentWidth ? contentWidth : '100%',
+          }}
+        >
           {stickyRightSelectionRect && activeCellRect && selectionRect && (
             <div
               className={cx(
-                'dsg-selection-sticky-rect',
-                'dsg-selection-sticky-rect-right',
+                'dsg-selection-rect',
+                'dsg-selection-rect-sticky',
+                'dsg-selection-rect-right-sticky',
                 selectionIsDisabled && 'dsg-selection-rect-disabled'
               )}
               style={{
                 ...stickyRightSelectionRect,
                 top: undefined,
+                // See reason for this above above
                 marginTop: stickyRightSelectionRect.top - headerRowHeight,
+                clipPath: isActiveCellSticky
+                  ? buildClipPath(
+                      activeCellRect.top - selectionRect.top,
+                      activeCellRect.left - selectionRect.left,
+                      activeCellRect.top +
+                        activeCellRect.height -
+                        selectionRect.top,
+                      activeCellRect.left +
+                        activeCellRect.width -
+                        selectionRect.left
+                    )
+                  : undefined,
               }}
             />
           )}
