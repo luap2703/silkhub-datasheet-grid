@@ -107,6 +107,9 @@ export const DataSheetGrid = React.memo(
 
         columnVisibilityModel,
         onColumnVisibilityChange,
+
+        bottomReachedBuffer,
+        onBottomReached,
       }: DataSheetGridProps<T>,
       ref: React.ForwardedRef<DataSheetGridRef>
     ): JSX.Element => {
@@ -2079,6 +2082,7 @@ export const DataSheetGrid = React.memo(
             hasStickyRightColumn={hasStickyRightColumn}
             hasStickyLeftColumn={hasStickyLeftColumn}
             heightDiff={heightDiff}
+            outerHeight={height}
             data={data}
             fullWidth={fullWidth}
             headerRowHeight={headerRowHeight}
@@ -2108,6 +2112,8 @@ export const DataSheetGrid = React.memo(
             getRowId={getRowId}
             table={tableCallbacks.current}
             getStickyColumnWidth={getStickyColumnWidth}
+            bottomReachedBuffer={bottomReachedBuffer}
+            onBottomReached={onBottomReached}
           >
             <SelectionRect
               columnRights={columnRights}

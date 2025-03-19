@@ -218,6 +218,9 @@ export type DataSheetGridProps<T> = {
   onSelectionChange?: (opts: { selection: SelectionWithId | null }) => void
   onScroll?: React.UIEventHandler<HTMLDivElement> | undefined
 
+  onBottomReached?: () => void
+  bottomReachedBuffer?: number
+
   loading?: boolean
   enforceLoading?: boolean
   loadingRowCount?: number

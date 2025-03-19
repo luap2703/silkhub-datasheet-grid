@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
 } from 'react'
 import {
   Cell,
@@ -47,6 +48,8 @@ export const Grid = <T extends any>({
   insertRowAfter,
   stopEditing,
   onScroll,
+  onBottomReached,
+  bottomReachedBuffer = 300,
 
   loading,
   loadingRowComponent,
@@ -65,6 +68,7 @@ export const Grid = <T extends any>({
   getStickyColumnWidth,
 
   heightDiff,
+  outerHeight,
 }: {
   data: T[]
   columns: Column<T, any, any>[]
@@ -92,6 +96,9 @@ export const Grid = <T extends any>({
   stopEditing: (opts?: { nextRow?: boolean }) => void
   onScroll?: React.UIEventHandler<HTMLDivElement>
 
+  onBottomReached?: () => void
+  bottomReachedBuffer?: number
+
   loading?: boolean
   loadingRowCount?: number
   loadingRowHeight?: number
@@ -100,6 +107,8 @@ export const Grid = <T extends any>({
   selectedRows: Set<string>
 
   heightDiff: number
+
+  outerHeight: number | undefined
 
   selectRows: (rowSelection: string[] | ((prev: string[]) => string[])) => void
 
@@ -243,13 +252,57 @@ export const Grid = <T extends any>({
     }
   }, [handleScroll, outerRef])
 
+  const isAtBottom = useRef(false)
+
+  const bottomReachedHandler = useCallback(() => {
+    const scrollableElement = outerRef.current
+    if (scrollableElement) {
+      const { scrollHeight, scrollTop, clientHeight } = scrollableElement
+
+      if (
+        scrollHeight - scrollTop - clientHeight < bottomReachedBuffer &&
+        data.length > 0
+      ) {
+        if (!isAtBottom.current) {
+          onBottomReached?.()
+          isAtBottom.current = true
+        }
+      } else {
+        isAtBottom.current = false
+      }
+    }
+  }, [bottomReachedBuffer, data.length, onBottomReached, outerRef])
+
+  const bottomReachedHandlerRef = useRef(bottomReachedHandler)
+  bottomReachedHandlerRef.current = bottomReachedHandler
+
+  // Also trigger bottomReacheed if layouting is done and the container is not scrollable bc the content is smaller than the container
+  useEffect(() => {
+    if (isAtBottom.current) return
+    if (
+      outerRef.current &&
+      innerRef.current &&
+      outerRef.current?.offsetHeight >= innerRef.current.offsetHeight
+    ) {
+      bottomReachedHandlerRef.current?.()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.length, outerHeight])
+
+  const onScrollHandler = useMemo(() => {
+    return (e: React.UIEvent<HTMLDivElement>) => {
+      onScroll?.(e)
+      bottomReachedHandler()
+    }
+  }, [onScroll, bottomReachedHandler])
+
   return (
     <div
       ref={outerRef}
       className={cx('dsg-container', 'group/container')}
       data-state={loading ? 'loading' : 'loaded'}
       data-aligned={heightDiff > 0 ? 'false' : 'true'}
-      onScroll={onScroll}
+      onScroll={onScrollHandler}
       //  style={{ height: displayHeight }}
     >
       <div

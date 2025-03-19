@@ -1,9 +1,9 @@
-import React, { useEffect, useLayoutEffect, useRef } from 'react'
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { CellComponent, CellProps, Column } from '../types'
 import cx from 'classnames'
 import { useFirstRender } from '../hooks/useFirstRender'
 
-type TextColumnOptions<T> = {
+export type TextColumnOptions<T> = {
   placeholder?: string
   alignRight?: boolean
   // When true, data is updated as the user types, otherwise it is only updated on blur. Default to true
@@ -20,15 +20,19 @@ type TextColumnOptions<T> = {
   formatForCopy?: (value: T) => string
   // Parse the pasted value
   parsePastedValue?: (value: string) => T
+
+  // Custom input component
+  InputComponent?: React.ElementType
 }
 
-type TextColumnData<T> = {
+export type TextColumnData<T> = {
   placeholder?: string
   alignRight: boolean
   continuousUpdates: boolean
   parseUserInput: (value: string) => T
   formatBlurredInput: (value: T) => string
   formatInputOnFocus: (value: T) => string
+  InputComponent: React.ElementType
 }
 
 const TextComponent = React.memo<
@@ -46,6 +50,7 @@ const TextComponent = React.memo<
       formatBlurredInput,
       parseUserInput,
       continuousUpdates,
+      InputComponent,
     },
   }) => {
     const ref = useRef<HTMLInputElement>(null)
@@ -129,8 +134,15 @@ const TextComponent = React.memo<
       }
     }, [focus, rowData])
 
+    type InputProps = React.ComponentProps<'input'> & { as?: React.ElementType }
+
+    const Input = useMemo(
+      () => (InputComponent || 'input') as React.FC<InputProps>,
+      [InputComponent]
+    )
+
     return (
-      <input
+      <Input
         // We use an uncontrolled component for better performance
         defaultValue={formatBlurredInput(rowData)}
         className={cx('dsg-input', alignRight && 'dsg-input-align-right')}
@@ -176,6 +188,7 @@ export function createTextColumn<T = string | null>({
   formatForCopy = (value) => String(value ?? ''),
   parsePastedValue = (value) =>
     (value.replace(/[\n\r]+/g, ' ').trim() || (null as unknown)) as T,
+  InputComponent = 'input',
 }: TextColumnOptions<T> = {}): Partial<Column<T, TextColumnData<T>, string>> {
   return {
     component: TextComponent as unknown as CellComponent<T, TextColumnData<T>>,
@@ -186,6 +199,7 @@ export function createTextColumn<T = string | null>({
       formatInputOnFocus,
       formatBlurredInput,
       parseUserInput,
+      InputComponent,
     },
     deleteValue: () => deletedValue,
     copyValue: ({ rowData }) => formatForCopy(rowData),
