@@ -231,6 +231,8 @@ export type DataSheetGridProps<T> = {
 
   columnVisibilityModel?: ColumnVisibilityModel
   onColumnVisibilityChange?: ColumnVisibilityModelChangeHandler
+
+  onCellCopy?: (cells: Cell[], textPlain: string, textHtml: string) => void
 }
 
 export type ColumnVisibilityModel = Set<string>

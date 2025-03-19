@@ -103,6 +103,7 @@ export const DataSheetGrid = React.memo(
 
         rowSelection,
         onRowSelectionChange,
+        onCellCopy,
 
         columnVisibilityModel,
         onColumnVisibilityChange,
@@ -695,6 +696,9 @@ export const DataSheetGrid = React.memo(
         [autoAddRow, insertRowAfter, setActiveCell]
       )
 
+      const onCellCopyRef = useRef(onCellCopy)
+      onCellCopyRef.current = onCellCopy
+
       const onCopy = useCallback(
         async (event?: ClipboardEvent) => {
           if (!editing && activeCellRef.current) {
@@ -702,6 +706,8 @@ export const DataSheetGrid = React.memo(
 
             const min: Cell = selection?.min || activeCellRef.current
             const max: Cell = selection?.max || activeCellRef.current
+
+            const copiedCells: Cell[] = []
 
             for (let row = min.row; row <= max.row; ++row) {
               copyData.push([])
@@ -711,6 +717,8 @@ export const DataSheetGrid = React.memo(
                 copyData[row - min.row].push(
                   copyValue({ rowData: data[row], rowIndex: row })
                 )
+
+                copiedCells.push({ col, row })
               }
             }
 
@@ -734,39 +742,40 @@ export const DataSheetGrid = React.memo(
               event.clipboardData?.setData('text/plain', textPlain)
               event.clipboardData?.setData('text/html', textHtml)
               event.preventDefault()
-              return
-            }
-
-            let success = false
-            if (navigator.clipboard.write !== undefined) {
-              const textBlob = new Blob([textPlain], {
-                type: 'text/plain',
-              })
-              const htmlBlob = new Blob([textHtml], { type: 'text/html' })
-              const clipboardData = [
-                new ClipboardItem({
-                  'text/plain': textBlob,
-                  'text/html': htmlBlob,
-                }),
-              ]
-              await navigator.clipboard.write(clipboardData).then(() => {
-                success = true
-              })
-            } else if (navigator.clipboard.writeText !== undefined) {
-              await navigator.clipboard.writeText(textPlain).then(() => {
-                success = true
-              })
-            } else if (document.execCommand !== undefined) {
-              const result = document.execCommand('copy')
-              if (result) {
-                success = true
+            } else {
+              let success = false
+              if (navigator.clipboard.write !== undefined) {
+                const textBlob = new Blob([textPlain], {
+                  type: 'text/plain',
+                })
+                const htmlBlob = new Blob([textHtml], { type: 'text/html' })
+                const clipboardData = [
+                  new ClipboardItem({
+                    'text/plain': textBlob,
+                    'text/html': htmlBlob,
+                  }),
+                ]
+                await navigator.clipboard.write(clipboardData).then(() => {
+                  success = true
+                })
+              } else if (navigator.clipboard.writeText !== undefined) {
+                await navigator.clipboard.writeText(textPlain).then(() => {
+                  success = true
+                })
+              } else if (document.execCommand !== undefined) {
+                const result = document.execCommand('copy')
+                if (result) {
+                  success = true
+                }
+              }
+              if (!success) {
+                alert(
+                  'This action is unavailable in your browser, but you can still use Ctrl+C for copy or Ctrl+X for cut'
+                )
               }
             }
-            if (!success) {
-              alert(
-                'This action is unavailable in your browser, but you can still use Ctrl+C for copy or Ctrl+X for cut'
-              )
-            }
+
+            onCellCopyRef.current?.(copiedCells, textPlain, textHtml)
           }
         },
         [columns, data, editing, selection]
