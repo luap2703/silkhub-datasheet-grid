@@ -1,4 +1,6 @@
-import React, { useState } from 'react'
+/* eslint-disable react/react-in-jsx-scope */
+
+import { useState } from 'react'
 import {
   checkboxColumn,
   Column,
@@ -23,16 +25,16 @@ function App() {
   const columns: Column<Row>[] = [
     {
       ...keyColumn<Row, 'active'>('active', checkboxColumn),
-      title: 'Active',
+      title: () => <>Active</>,
       grow: 0.5,
     },
     {
       ...keyColumn<Row, 'firstName'>('firstName', textColumn),
-      title: 'First name',
+      title: () => <>First name</>,
     },
     {
       ...keyColumn<Row, 'lastName'>('lastName', textColumn),
-      title: 'Last name',
+      title: () => <>Last name</>,
       grow: 2,
     },
   ]

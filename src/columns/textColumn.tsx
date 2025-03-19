@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+import React, { useEffect, useLayoutEffect, useRef } from 'react'
 import { CellComponent, CellProps, Column } from '../types'
 import cx from 'classnames'
 import { useFirstRender } from '../hooks/useFirstRender'
@@ -136,10 +136,7 @@ const TextComponent = React.memo<
 
     type InputProps = React.ComponentProps<'input'> & { as?: React.ElementType }
 
-    const Input = useMemo(
-      () => (InputComponent || 'input') as React.FC<InputProps>,
-      [InputComponent]
-    )
+    const Input = (InputComponent || 'input') as React.FC<InputProps>
 
     return (
       <Input

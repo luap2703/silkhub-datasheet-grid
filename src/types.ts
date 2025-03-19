@@ -50,6 +50,15 @@ export type HeaderCellComponent<C> = (opts: {
   table: TableCallbackProps
 }) => React.JSX.Element
 
+/**
+ * Result type of a key selector function
+ * @description This type is used to merge the updated value with the original row data.
+ * @param operationValue - Is used when the key prop of the column is a selector function. Then we want to result an updated value in the operation object. (We can't return it in the original key prop, because we don't have one)
+ */
+export type OperationResult<T> =
+  | T
+  | ({ $operationValue?: Record<string, any> } & T)
+
 export type Column<T, C, PasteValue> = {
   id?: string
   headerClassName?: string
@@ -75,9 +84,13 @@ export type Column<T, C, PasteValue> = {
         columnId?: string
       }) => string | undefined)
   keepFocus: boolean
-  deleteValue: (opt: { rowData: T; rowIndex: number }) => T
+  deleteValue: (opt: { rowData: T; rowIndex: number }) => OperationResult<T>
   copyValue: (opt: { rowData: T; rowIndex: number }) => number | string | null
-  pasteValue: (opt: { rowData: T; value: PasteValue; rowIndex: number }) => T
+  pasteValue: (opt: {
+    rowData: T
+    value: PasteValue
+    rowIndex: number
+  }) => OperationResult<T>
   prePasteValues: (values: string[]) => PasteValue[] | Promise<PasteValue[]>
   isCellEmpty: (opt: { rowData: T; rowIndex: number }) => boolean
 
@@ -191,7 +204,7 @@ export type DataSheetGridProps<T> = {
         rowIndex: number
         columnId?: string
       }) => string | undefined)
-  onChange?: (value: T[], operations: Operation[]) => void
+  onChange?: (value: OperationResult<T>[], operations: Operation[]) => void
   columns?: Partial<Column<T, any, any>>[]
   gutterColumn?: SimpleColumn<T, any> | false
 

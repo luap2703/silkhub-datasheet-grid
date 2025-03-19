@@ -18,6 +18,7 @@ import {
   Selection,
   SelectionWithIdInput,
   TableCallbackProps,
+  OperationResult,
 } from '../types'
 import { useColumnWidths } from '../hooks/useColumnWidths'
 import { useResizeDetector } from 'react-resize-detector'
@@ -547,7 +548,7 @@ export const DataSheetGrid = React.memo(
       }, [activeCell, scrollTo])
 
       const setRowData = useCallback(
-        (rowIndex: number, item: T) => {
+        (rowIndex: number, item: OperationResult<T>) => {
           onChange(
             [
               ...dataRef.current?.slice(0, rowIndex),
