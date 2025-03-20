@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react'
+import React, { useCallback, useMemo, useRef } from 'react'
 import { CellComponent, Column, OperationResult } from '../types'
 
 type ColumnData = {
@@ -30,6 +30,10 @@ const KeyComponent: CellComponent<any, ColumnData> = ({
     [id, key, setRowData]
   )
 
+  const keyColumnRowData = useMemo(() => {
+    return getKeyRowData(rowData, key)
+  }, [key, rowData])
+
   if (!original.component) {
     return <></>
   }
@@ -42,7 +46,7 @@ const KeyComponent: CellComponent<any, ColumnData> = ({
       setRowData={setKeyData}
       // We only pass the value of the desired key, this is why each cell does not have to re-render everytime
       // another cell in the same row changes!
-      rowData={getKeyRowData(rowData, key)}
+      rowData={keyColumnRowData}
       {...rest}
     />
   )

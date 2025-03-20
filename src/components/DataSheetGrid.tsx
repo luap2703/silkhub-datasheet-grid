@@ -28,7 +28,6 @@ import { useDeepEqualState } from '../hooks/useDeepEqualState'
 import { useDocumentEventListener } from '../hooks/useDocumentEventListener'
 import { useGetBoundingClientRect } from '../hooks/useGetBoundingClientRect'
 import { AddRows } from './AddRows'
-import { useDebounceState } from '../hooks/useDebounceState'
 import deepEqual from 'fast-deep-equal'
 import { ContextMenu as DefaultContextMenu } from './ContextMenu'
 import {
@@ -157,7 +156,7 @@ export const DataSheetGrid = React.memo(
       selectedRowsRef.current = selectedRows
 
       // Default value is 1 for the border
-      const [heightDiff, setHeightDiff] = useDebounceState(1, 1000)
+      //  const [heightDiff, setHeightDiff] = useDebounceState(1, 1000)
 
       const { getRowSize, totalSize, getRowIndex } = useRowHeights({
         value: data,
@@ -165,10 +164,10 @@ export const DataSheetGrid = React.memo(
       })
 
       // Height of the list (including scrollbars and borders) to display
-      const displayHeight = Math.min(
+      /* const displayHeight = Math.min(
         maxHeight,
         headerRowHeight + totalSize(maxHeight) + heightDiff
-      )
+      )*/
 
       // Width and height of the scrollable area
       const { width, height } = useResizeDetector({
@@ -177,7 +176,7 @@ export const DataSheetGrid = React.memo(
         refreshRate: 150,
       })
 
-      setHeightDiff(height ? displayHeight - height : 0)
+      //  setHeightDiff(height ? displayHeight - height : 0)
 
       const edges = useEdges(outerRef, width, height)
 
@@ -2082,7 +2081,6 @@ export const DataSheetGrid = React.memo(
             columnWidths={columnWidths}
             hasStickyRightColumn={hasStickyRightColumn}
             hasStickyLeftColumn={hasStickyLeftColumn}
-            heightDiff={heightDiff}
             outerHeight={height}
             data={data}
             fullWidth={fullWidth}

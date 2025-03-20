@@ -486,6 +486,7 @@
 
 .dsg-selection-rect-sticky-container {
   position: absolute;
+  pointer-events: none;
 }
 
 .dsg-selection-rect-sticky-container-left {

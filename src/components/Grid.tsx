@@ -22,6 +22,8 @@ import { useMemoizedIndexCallback } from '../hooks/useMemoizedIndexCallback'
 import { HorizontalScrollShadow } from './HorizontalScrollShadow'
 import { throttle } from 'throttle-debounce'
 
+const FallbackHeader: HeaderCellComponent<any> = () => <></>
+
 export const Grid = <T extends any>({
   data,
   columns,
@@ -67,7 +69,6 @@ export const Grid = <T extends any>({
 
   getStickyColumnWidth,
 
-  heightDiff,
   outerHeight,
 }: {
   data: T[]
@@ -105,8 +106,6 @@ export const Grid = <T extends any>({
   loadingRowComponent?: ReactNode
 
   selectedRows: Set<string>
-
-  heightDiff: number
 
   outerHeight: number | undefined
 
@@ -301,7 +300,6 @@ export const Grid = <T extends any>({
       ref={outerRef}
       className={cx('dsg-container', 'group/container')}
       data-state={loading ? 'loading' : 'loaded'}
-      data-aligned={heightDiff > 0 ? 'false' : 'true'}
       onScroll={onScrollHandler}
       //  style={{ height: displayHeight }}
     >
@@ -322,12 +320,8 @@ export const Grid = <T extends any>({
             }}
           >
             {colVirtualizer.getVirtualItems().map((col) => {
-              const title = columns[col.index].title
-              const Header: HeaderCellComponent<T> = title
-                ? typeof title === 'function'
-                  ? title
-                  : () => title
-                : () => <></>
+              const Header: HeaderCellComponent<T> =
+                columns[col.index].title ?? FallbackHeader
 
               const isStickyLeft =
                 hasStickyLeftColumn && columns[col.index].sticky === 'left'
