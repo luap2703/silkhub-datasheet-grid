@@ -22,6 +22,8 @@ import { useMemoizedIndexCallback } from '../hooks/useMemoizedIndexCallback'
 import { HorizontalScrollShadow } from './HorizontalScrollShadow'
 import { throttle } from 'throttle-debounce'
 
+const FallbackHeader: HeaderCellComponent<any> = () => <></>
+
 export const Grid = <T extends any>({
   data,
   columns,
@@ -322,12 +324,8 @@ export const Grid = <T extends any>({
             }}
           >
             {colVirtualizer.getVirtualItems().map((col) => {
-              const title = columns[col.index].title
-              const Header: HeaderCellComponent<T> = title
-                ? typeof title === 'function'
-                  ? title
-                  : () => title
-                : () => <></>
+              const Header: HeaderCellComponent<T> =
+                columns[col.index].title ?? FallbackHeader
 
               const isStickyLeft =
                 hasStickyLeftColumn && columns[col.index].sticky === 'left'

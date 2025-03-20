@@ -40,15 +40,15 @@ export type SelectRowsHandler = (
   rowSelection: string[] | ((prev: string[]) => string[])
 ) => void
 
-export type CellComponent<T, C> = (props: CellProps<T, C>) => JSX.Element
-export type HeaderCellComponent<C> = (opts: {
+export type CellComponent<T, C> = React.FC<CellProps<T, C>>
+export type HeaderCellComponent<C> = React.FC<{
   columnData: C
   selectedRows: string[]
   selectRows: SelectRowsHandler
   selectAllRows: () => void
 
   table: TableCallbackProps
-}) => React.JSX.Element
+}>
 
 /**
  * Result type of a key selector function
