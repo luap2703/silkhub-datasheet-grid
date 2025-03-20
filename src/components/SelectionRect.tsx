@@ -342,16 +342,30 @@ export const SelectionRect = React.memo<SelectionContextType>(
         )}
         {activeCellRect && activeCell && (
           <div
-            className={cx('dsg-active-cell', {
-              'dsg-active-cell-focus': editing,
-              'dsg-active-cell-disabled': activeCellIsDisabled,
-              'dsg-active-cell-passive': !activeCellIsInteractive,
-            })}
+            className="dsg-active-cell-container"
             style={{
-              ...activeCellRect,
-              zIndex: isActiveCellSticky ? 31 : undefined,
+              position: isActiveCellSticky ? 'absolute' : undefined,
+              left: isActiveCellSticky ? 0 : undefined,
+
+              top: activeCellRect?.top,
+              height: 0,
+              width: contentWidth ? contentWidth : '100%',
             }}
-          />
+          >
+            <div
+              className={cx('dsg-active-cell', {
+                'dsg-active-cell-focus': editing,
+                'dsg-active-cell-disabled': activeCellIsDisabled,
+                'dsg-active-cell-passive': !activeCellIsInteractive,
+              })}
+              style={{
+                ...activeCellRect,
+                position: isActiveCellSticky ? 'sticky' : undefined,
+
+                top: isActiveCellSticky ? undefined : activeCellRect.top,
+              }}
+            />
+          </div>
         )}
         {selectionRect && activeCellRect && (
           <div

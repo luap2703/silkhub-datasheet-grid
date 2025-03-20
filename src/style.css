@@ -467,10 +467,16 @@
 .dsg-selection-col-marker-container,
 .dsg-selection-col-marker,
 .dsg-selection-row-marker-container,
-.dsg-selection-row-marker {
+.dsg-selection-row-marker,
+.dsg-active-cell-container {
   z-index: 20;
   transition: all var(--dsg-transition-duration);
   pointer-events: none;
+}
+
+/* Must be the highest z-index */
+.dsg-active-cell-container {
+  z-index: 31;
 }
 
 .dsg-selection-col-marker-disabled,
@@ -646,7 +652,8 @@
 }
 
 .dsg-sticky-column-shadow {
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  box-shadow: inset -1px 0 0 var(--dsg-border-color),
+    0 2px 5px rgba(0, 0, 0, 0.3);
   clip-path: inset(0px -36px 0px 0px);
   margin-left: -1px;
   position: sticky;
@@ -655,6 +662,10 @@
   width: 1px;
   background-color: transparent;
   color: transparent;
-  z-index: 25;
-  transition: box-shadow var(--dsg-transition-duration);
+  z-index: 41; /* +1 vs. header */
+  transition: opacity var(--dsg-transition-duration);
+}
+
+.dsg-selection-row-marker-container {
+  z-index: 31;
 }
