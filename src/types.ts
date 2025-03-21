@@ -249,6 +249,8 @@ export type DataSheetGridProps<T> = {
   onColumnVisibilityChange?: ColumnVisibilityModelChangeHandler
 
   onCellCopy?: (cells: Cell[], textPlain: string, textHtml: string) => void
+
+  overscanRows?: number
 }
 
 export type ColumnVisibilityModel = Set<string>

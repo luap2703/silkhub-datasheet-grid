@@ -70,6 +70,7 @@ export const Grid = <T extends any>({
   getStickyColumnWidth,
 
   outerHeight,
+  overscanRows = 10,
 }: {
   data: T[]
   columns: Column<T, any, any>[]
@@ -118,6 +119,8 @@ export const Grid = <T extends any>({
   table: TableCallbackProps
 
   getStickyColumnWidth: (side: 'left' | 'right') => number
+
+  overscanRows: number | undefined
 }) => {
   const LoadingComponent = useMemo(
     () => loadingRowComponent ?? <div>Loading...</div>,
@@ -150,7 +153,7 @@ export const Grid = <T extends any>({
       }
       return index
     },
-    overscan: 5,
+    overscan: overscanRows,
   })
 
   const colVirtualizer = useVirtualizer({

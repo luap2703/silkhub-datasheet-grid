@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import cx from 'classnames'
 import { SelectionContextType } from '../types'
 
@@ -105,13 +105,19 @@ export const SelectionRect = React.memo<SelectionContextType>(
       return true
     }, [activeCellIsDisabled, isCellDisabled, selection])
 
+    const maxStickyLeft = useMemo(() => {
+      return getStickyColumnMaxIndex('left') ?? 0
+    }, [getStickyColumnMaxIndex])
+
+    const maxStickyRight = useMemo(() => {
+      return (
+        getStickyColumnMaxIndex('right') ?? columnWidths?.length ?? 0 - 1 ?? 0
+      )
+    }, [columnWidths?.length, getStickyColumnMaxIndex])
+
     // If a sticky Column is in selection, we have to increase z-index
     const isStickySelected = useMemo(() => {
       if (!columnWidths || (!selection && !activeCell)) return false
-
-      const maxStickyLeft = getStickyColumnMaxIndex('left') ?? 0
-      const maxStickyRight =
-        getStickyColumnMaxIndex('right') ?? columnWidths.length ?? 0 - 1
 
       const cells = selection
         ? [selection.min, selection.max]
@@ -139,52 +145,66 @@ export const SelectionRect = React.memo<SelectionContextType>(
       }
 
       return false
-    }, [columnWidths, selection, activeCell, getStickyColumnMaxIndex])
+    }, [columnWidths, selection, activeCell, maxStickyLeft, maxStickyRight])
 
     const isActiveCellSticky = useMemo(() => {
       if (!activeCell) return false
-
-      const maxStickyLeft = getStickyColumnMaxIndex('left') ?? 0
-      const maxStickyRight =
-        getStickyColumnMaxIndex('right') ?? (columnWidths?.length ?? 0) - 1
 
       return (
         activeCell.col + 1 <= maxStickyLeft ||
         activeCell.col - 1 >= maxStickyRight
       )
-    }, [activeCell, columnWidths?.length, getStickyColumnMaxIndex])
+    }, [activeCell, maxStickyLeft, maxStickyRight])
 
-    if (!columnWidths || !columnRights) {
-      return null
-    }
+    const extraPixelV = useCallback(
+      (rowI: number): number => {
+        return rowI < dataLength - 1 ? 1 : 0
+      },
+      [dataLength]
+    )
 
-    const extraPixelV = (rowI: number): number => {
-      return rowI < dataLength - 1 ? 1 : 0
-    }
-
-    const extraPixelH = (colI: number): number => {
-      return colI < columnWidths.length - (hasStickyRightColumn ? 3 : 2) ? 1 : 0
-    }
+    const extraPixelH = useCallback(
+      (colI: number): number => {
+        return colI <
+          (columnWidths?.length ?? 0) - (hasStickyRightColumn ? 3 : 2)
+          ? 1
+          : 0
+      },
+      [columnWidths?.length, hasStickyRightColumn]
+    )
 
     const activeCellRect = activeCell && {
-      width: columnWidths[activeCell.col + 1] + extraPixelH(activeCell.col),
+      width:
+        (columnWidths?.[activeCell.col + 1] ?? 0) + extraPixelH(activeCell.col),
       height: rowHeight(activeCell.row).height + extraPixelV(activeCell.row),
-      left: columnRights[activeCell.col],
+      left: columnRights?.[activeCell.col] ?? 0,
       top: rowHeight(activeCell.row).top + headerRowHeight,
     }
 
     const selectionRect = selection && {
       width:
-        columnWidths
-          .slice(selection.min.col + 1, selection.max.col + 2)
-          .reduce((a, b) => a + b) + extraPixelH(selection.max.col),
+        (columnWidths
+          ?.slice(selection.min.col + 1, selection.max.col + 2)
+          ?.reduce((a, b) => a + b) ?? 0) + extraPixelH(selection.max.col),
       height:
         rowHeight(selection.max.row).top +
         rowHeight(selection.max.row).height -
         rowHeight(selection.min.row).top +
         extraPixelV(selection.max.row),
-      left: columnRights[selection.min.col],
+      left: columnRights?.[selection.min.col] ?? 0,
       top: rowHeight(selection.min.row).top + headerRowHeight,
+    }
+
+    const leftStickyColumnWidth = useMemo(() => {
+      return getStickyColumnWidth('left')
+    }, [getStickyColumnWidth])
+
+    const rightStickyColumnWidth = useMemo(() => {
+      return getStickyColumnWidth('right')
+    }, [getStickyColumnWidth])
+
+    if (!columnWidths || !columnRights) {
+      return null
     }
 
     /**
@@ -201,7 +221,7 @@ export const SelectionRect = React.memo<SelectionContextType>(
         ? {
             ...selectionRect,
             width:
-              getStickyColumnWidth('left') -
+              leftStickyColumnWidth -
               columnWidths
                 .slice(0, selection.min.col + 1)
                 .reduce((a, b) => a + b),
@@ -215,9 +235,8 @@ export const SelectionRect = React.memo<SelectionContextType>(
       !isStickySelected.exclusively
         ? {
             ...selectionRect,
-            left: getStickyColumnWidth('right'),
-            width:
-              columnRights[selection.max.col] - getStickyColumnWidth('right'),
+            left: rightStickyColumnWidth,
+            width: columnRights[selection.max.col] - rightStickyColumnWidth,
           }
         : null
 
