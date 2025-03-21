@@ -104,6 +104,8 @@ export const Grid = <T extends any>({
 
   onBottomReached?: () => void
   onBottomDataReached?: (index: number) => void
+  onBottomThrottleRate?: number
+
   bottomReachedBuffer?: number
 
   loading?: boolean
@@ -127,6 +129,11 @@ export const Grid = <T extends any>({
 
   overscanRows: number | undefined
 }) => {
+  const dataRef = useRef(data)
+  dataRef.current = data
+  const onBottomDataReachedRef = useRef(onBottomDataReached)
+  onBottomDataReachedRef.current = onBottomDataReached
+
   const LoadingComponent = useMemo(
     () => loadingRowComponent ?? <div>Loading...</div>,
     [loadingRowComponent]
@@ -139,7 +146,7 @@ export const Grid = <T extends any>({
 
     estimateSize: (index) =>
       loading
-        ? loadingRowHeight ?? rowHeight(index).height
+        ? (loadingRowHeight ?? rowHeight(index).height)
         : rowHeight(index).height,
     getItemKey: (index: number): Key => {
       if (data[index] === null) {
@@ -242,50 +249,98 @@ export const Grid = <T extends any>({
 
   const [isHorizontallyScrolled, setIsScrolled] = React.useState(false)
 
-  const handleScroll = useCallback(() => {
-    if (outerRef.current) {
-      const target = outerRef.current
-
-      if (target.scrollLeft > 0.01) {
-        setIsScrolled(true)
-      } else {
-        setIsScrolled(false)
+  const nullValueCount = useMemo(() => {
+    // Count the number of null's in the virtualized rows
+    let nullCount = 0
+    for (let i = 0; i < rowVirtualizer.getVirtualItems().length; i++) {
+      if (data[rowVirtualizer.getVirtualItems()[i].index] === null) {
+        nullCount++
       }
+    }
+
+    return nullCount
+  }, [data])
+
+  const bottomReachedHandler = useCallback(
+    throttle(bottomReachedBuffer, () => {
+      const scrollableElement = outerRef.current
+      if (scrollableElement) {
+        const { scrollHeight, scrollTop, clientHeight } = scrollableElement
+
+        if (
+          scrollHeight - scrollTop - clientHeight < bottomReachedBuffer &&
+          dataRef.current.length > 0
+        ) {
+          if (!isAtBottom.current) {
+            onBottomReached?.()
+            isAtBottom.current = true
+          }
+        } else {
+          isAtBottom.current = false
+        }
+      }
+    }),
+    [bottomReachedBuffer, onBottomReached, outerRef]
+  )
+
+  const horizontallyScrolledHandler = useCallback(() => {
+    if (outerRef.current) {
+      const isScrolled = outerRef.current.scrollLeft > 0.01
+      if (isScrolled !== isHorizontallyScrolledRef.current)
+        setIsScrolled(outerRef.current.scrollLeft > 0.01)
     }
   }, [outerRef])
 
-  useEffect(() => {
-    const throttledScroll = throttle(500, handleScroll)
-    const ref = outerRef.current
-    ref?.addEventListener('scroll', throttledScroll)
-    return () => {
-      ref?.removeEventListener('scroll', throttledScroll)
-    }
-  }, [handleScroll, outerRef])
-
-  const isAtBottom = useRef(false)
-
-  const bottomReachedHandler = useCallback(() => {
-    const scrollableElement = outerRef.current
-    if (scrollableElement) {
-      const { scrollHeight, scrollTop, clientHeight } = scrollableElement
-
-      if (
-        scrollHeight - scrollTop - clientHeight < bottomReachedBuffer &&
-        data.length > 0
-      ) {
-        if (!isAtBottom.current) {
-          onBottomReached?.()
-          isAtBottom.current = true
-        }
-      } else {
-        isAtBottom.current = false
-      }
-    }
-  }, [bottomReachedBuffer, data.length, onBottomReached, outerRef])
-
   const bottomReachedHandlerRef = useRef(bottomReachedHandler)
   bottomReachedHandlerRef.current = bottomReachedHandler
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const bottomDataReachedHandler = useCallback(
+    throttle(bottomReachedBuffer, () => {
+      // This should be a handler to figure out if a data point that is NULL is reached, aka rendered. If so, we should trigger a fetch for more data
+      // Get the index of the first row that is NULL
+
+      if (!rowVirtualizerRef.current) return
+
+      const renderedElements = rowVirtualizerRef.current.getVirtualItems()
+      if (!renderedElements.length) return
+
+      // Check if one of the indices is NULL
+      let firstNullIndex: number | null = null
+
+      for (let i = 0; i < renderedElements.length; i++) {
+        if (dataRef.current[renderedElements[i].index] === null) {
+          firstNullIndex = renderedElements[i].index
+          break
+        }
+      }
+
+      if (firstNullIndex === null) return
+
+      // Now we know that smth is null. We should refetch with the firstNullIndex as the starting point
+      onBottomDataReachedRef.current?.(firstNullIndex)
+    }),
+    []
+  )
+
+  // Also trigger onBottomDataReached if the number of null values in the view changes.
+  useEffect(() => {
+    if (!loading && nullValueCount > 0) {
+      bottomDataReachedHandler()
+    }
+  }, [nullValueCount])
+
+  const isHorizontallyScrolledRef = useRef(isHorizontallyScrolled)
+  isHorizontallyScrolledRef.current = isHorizontallyScrolled
+
+  const onScrollHandler = useMemo(() => {
+    return (e: React.UIEvent<HTMLDivElement>) => {
+      onScroll?.(e)
+      horizontallyScrolledHandler()
+      bottomReachedHandler()
+      bottomDataReachedHandler()
+    }
+  }, [onScroll, bottomReachedHandler, bottomDataReachedHandler])
 
   // Also trigger bottomReacheed if layouting is done and the container is not scrollable bc the content is smaller than the container
   useEffect(() => {
@@ -298,56 +353,12 @@ export const Grid = <T extends any>({
       bottomReachedHandlerRef.current?.()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.length, outerHeight])
+  }, [data, loading, outerHeight])
 
-  const firstNullIndex = useMemo(() => {
-    return data.findIndex((d) => d === null)
-  }, [data])
-
-  const firstNullIndexRef = useRef(firstNullIndex)
-  firstNullIndexRef.current = firstNullIndex
-
-  const onBottomDataReachedRef = useRef(onBottomDataReached)
-  onBottomDataReachedRef.current = onBottomDataReached
+  const isAtBottom = useRef(false)
 
   const rowVirtualizerRef = useRef(rowVirtualizer)
   rowVirtualizerRef.current = rowVirtualizer
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const bottomDataReachedHandler = useCallback(
-    throttle(250, () => {
-      // This should be a handler to figure out if a data point that is NULL is reached, aka rendered. If so, we should trigger a fetch for more data
-      // Get the index of the first row that is NULL
-      if (firstNullIndexRef.current === -1) return
-      if (!rowVirtualizerRef.current) return
-      console.log('bottomDataReachedHandler')
-
-      const renderedElements = rowVirtualizerRef.current.getVirtualItems()
-      if (!renderedElements.length) return
-
-      const indexes = new Array(renderedElements.length)
-      for (
-        let i = renderedElements[0].index;
-        i < renderedElements.length;
-        i++
-      ) {
-        indexes[i] = renderedElements[i].index // oder die entsprechende Eigenschaft
-      }
-      // If the first NULL element is within the rendered elements, we should trigger a fetch for more data
-      if (indexes.includes(firstNullIndexRef.current)) {
-        onBottomDataReachedRef.current?.(firstNullIndexRef.current)
-      }
-    }),
-    [bottomReachedHandlerRef, rowVirtualizerRef.current]
-  )
-
-  const onScrollHandler = useMemo(() => {
-    return (e: React.UIEvent<HTMLDivElement>) => {
-      onScroll?.(e)
-      bottomReachedHandler()
-      bottomDataReachedHandler()
-    }
-  }, [onScroll, bottomReachedHandler, bottomDataReachedHandler])
 
   return (
     <div

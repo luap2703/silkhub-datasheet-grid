@@ -112,8 +112,10 @@ export const DataSheetGrid = React.memo(
         onColumnVisibilityChange,
 
         bottomReachedBuffer,
+
         onBottomReached,
         onBottomDataReached,
+        onBottomThrottleRate = 1_000,
 
         overscanRows,
       }: DataSheetGridProps<T>,
@@ -1018,11 +1020,11 @@ export const DataSheetGrid = React.memo(
           dataRef.current[rowIndex] === null
             ? getLoadingKey(rowIndex)
             : typeof rowKey === 'function'
-            ? rowKey({
-                rowIndex: rowIndex,
-                rowData: dataRef.current[rowIndex],
-              })
-            : rowKey ?? rowIndex.toString(),
+              ? rowKey({
+                  rowIndex: rowIndex,
+                  rowData: dataRef.current[rowIndex],
+                })
+              : (rowKey ?? rowIndex.toString()),
         [rowKey]
       )
 
@@ -2199,6 +2201,7 @@ export const DataSheetGrid = React.memo(
             bottomReachedBuffer={bottomReachedBuffer}
             onBottomReached={onBottomReached}
             onBottomDataReached={onBottomDataReached}
+            onBottomThrottleRate={onBottomThrottleRate}
             overscanRows={overscanRows}
           >
             <SelectionRect

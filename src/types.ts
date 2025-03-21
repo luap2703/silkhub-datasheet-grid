@@ -232,12 +232,16 @@ export type DataSheetGridProps<T> = {
   onScroll?: React.UIEventHandler<HTMLDivElement> | undefined
 
   onBottomReached?: () => void
+
   onBottomDataReached?: (index: number) => void
+
+  onBottomThrottleRate?: number
 
   bottomReachedBuffer?: number
 
   loading?: boolean
   enforceLoading?: boolean
+
   loadingRowCount?: number
   loadingRowHeight?: number
   loadingRowComponent?: ReactNode
