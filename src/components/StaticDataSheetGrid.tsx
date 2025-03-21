@@ -1,5 +1,5 @@
 import { DataSheetGridProps, DataSheetGridRef } from '../types'
-import { useState } from 'react'
+import { useState, type JSX } from 'react';
 import { DataSheetGrid } from './DataSheetGrid'
 import React from 'react'
 

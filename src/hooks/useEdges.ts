@@ -3,7 +3,7 @@ import { throttle } from 'throttle-debounce'
 import { useDeepEqualState } from './useDeepEqualState'
 
 export const useEdges = (
-  ref: React.RefObject<HTMLElement>,
+  ref: React.RefObject<HTMLElement | undefined | null>,
   width?: number,
   height?: number
 ) => {

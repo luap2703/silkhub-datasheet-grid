@@ -6,7 +6,7 @@ export const useDebounceState = <T>(
   delay: number
 ): [T, (nextVal: T) => void] => {
   const [debouncedValue, setDebouncedValue] = useState(defaultValue)
-  const cancelRef = useRef<debounce<(newValue: T) => void>>()
+  const cancelRef = useRef<debounce<(newValue: T) => void>>(undefined)
 
   useEffect(() => () => cancelRef.current?.cancel(), [])
 

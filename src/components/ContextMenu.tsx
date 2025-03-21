@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { FC, useCallback, useRef } from 'react'
+import { FC, useCallback, useRef, type JSX } from 'react';
 import { useDocumentEventListener } from '../hooks/useDocumentEventListener'
 import { ContextMenuItem, ContextMenuComponentProps } from '../types'
 

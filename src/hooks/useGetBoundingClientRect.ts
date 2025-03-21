@@ -3,14 +3,14 @@ import { throttle } from 'throttle-debounce'
 
 // Cache bounding rect in a ref and only recompute every <delay>ms
 export const useGetBoundingClientRect = (
-  ref: RefObject<HTMLElement>,
+  ref: RefObject<HTMLElement | undefined | null>,
   delay = 200
 ) => {
   const boundingRect = useRef<DOMRect | null>(null)
 
   const throttledCompute = useMemo(
     () =>
-      throttle(delay, true, () => {
+      throttle(delay, () => {
         setTimeout(
           () =>
             (boundingRect.current =

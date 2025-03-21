@@ -115,7 +115,7 @@ export type Column<T, C, PasteValue> = {
 
 export type ContextMenuType = (
   props: ContextMenuComponentProps
-) => React.JSX.Element | null
+) => React.ReactElement<any> | null
 
 export type SelectionContextType = {
   columnRights?: number[]
@@ -213,7 +213,7 @@ export type DataSheetGridProps<T> = {
   rowHeight?: number | ((opt: { rowData: T; rowIndex: number }) => number)
   headerRowHeight?: number
   addRowsComponent?:
-    | ((props: AddRowsComponentProps) => React.ReactElement | null)
+    | ((props: AddRowsComponentProps) => React.ReactElement<any> | null)
     | false
   createRow?: () => T
   duplicateRow?: (opts: { rowData: T; rowIndex: number }) => T
@@ -224,7 +224,7 @@ export type DataSheetGridProps<T> = {
   disableSmartDelete?: boolean
   contextMenuComponent?: (
     props: ContextMenuComponentProps
-  ) => React.ReactElement | null
+  ) => React.ReactElement<any> | null
   onFocus?: (opts: { cell: CellWithId }) => void
   onBlur?: (opts: { cell: CellWithId }) => void
   onActiveCellChange?: (opts: { cell: CellWithId | null }) => void

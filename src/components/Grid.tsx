@@ -23,6 +23,8 @@ import { HorizontalScrollShadow } from './HorizontalScrollShadow'
 import { throttle } from 'throttle-debounce'
 import { getLoadingKey } from '../utils/loading-key'
 
+declare type Key = string | number
+
 const FallbackHeader: HeaderCellComponent<any> = () => <></>
 
 export const Grid = <T extends any>({
@@ -76,8 +78,8 @@ export const Grid = <T extends any>({
 }: {
   data: T[]
   columns: Column<T, any, any>[]
-  outerRef: RefObject<HTMLDivElement>
-  innerRef: RefObject<HTMLDivElement>
+  outerRef: RefObject<HTMLDivElement | null>
+  innerRef: RefObject<HTMLDivElement | null>
   columnWidths?: number[]
   hasStickyRightColumn: boolean
   hasStickyLeftColumn: boolean
@@ -134,11 +136,12 @@ export const Grid = <T extends any>({
     count: loading ? loadingRowCount : data.length,
     getScrollElement: () => outerRef.current,
     paddingStart: headerRowHeight,
+
     estimateSize: (index) =>
       loading
         ? loadingRowHeight ?? rowHeight(index).height
         : rowHeight(index).height,
-    getItemKey: (index: number): React.Key => {
+    getItemKey: (index: number): Key => {
       if (data[index] === null) {
         return getLoadingKey(index)
       }
@@ -167,7 +170,7 @@ export const Grid = <T extends any>({
     getScrollElement: () => outerRef.current,
     estimateSize: (index) => columnWidths?.[index] ?? 100,
     horizontal: true,
-    getItemKey: (index: number): React.Key => columns[index].id ?? index,
+    getItemKey: (index: number): Key => columns[index].id ?? index,
     overscan: 1,
 
     rangeExtractor: (range) => {
@@ -252,7 +255,7 @@ export const Grid = <T extends any>({
   }, [outerRef])
 
   useEffect(() => {
-    const throttledScroll = throttle(500, false, handleScroll)
+    const throttledScroll = throttle(500, handleScroll)
     const ref = outerRef.current
     ref?.addEventListener('scroll', throttledScroll)
     return () => {
@@ -310,22 +313,28 @@ export const Grid = <T extends any>({
   const rowVirtualizerRef = useRef(rowVirtualizer)
   rowVirtualizerRef.current = rowVirtualizer
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const bottomDataReachedHandler = useCallback(
-    throttle(250, false, () => {
+    throttle(250, () => {
       // This should be a handler to figure out if a data point that is NULL is reached, aka rendered. If so, we should trigger a fetch for more data
       // Get the index of the first row that is NULL
       if (firstNullIndexRef.current === -1) return
       if (!rowVirtualizerRef.current) return
       console.log('bottomDataReachedHandler')
 
-      if (typeof rowVirtualizerRef.current.getVirtualIndexes !== 'function') {
-        console.log('rowVirtualizer', rowVirtualizerRef.current)
-        return
-      }
-      const renderedElements = rowVirtualizerRef.current.getVirtualIndexes()
+      const renderedElements = rowVirtualizerRef.current.getVirtualItems()
+      if (!renderedElements.length) return
 
+      const indexes = new Array(renderedElements.length)
+      for (
+        let i = renderedElements[0].index;
+        i < renderedElements.length;
+        i++
+      ) {
+        indexes[i] = renderedElements[i].index // oder die entsprechende Eigenschaft
+      }
       // If the first NULL element is within the rendered elements, we should trigger a fetch for more data
-      if (renderedElements.includes(firstNullIndexRef.current)) {
+      if (indexes.includes(firstNullIndexRef.current)) {
         onBottomDataReachedRef.current?.(firstNullIndexRef.current)
       }
     }),

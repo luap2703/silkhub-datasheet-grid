@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useRef,
   useState,
+  type JSX,
 } from 'react'
 import {
   Cell,
@@ -1430,8 +1431,9 @@ export const DataSheetGrid = React.memo(
       ])
       useDocumentEventListener('mouseup', onMouseUp)
 
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       const onMouseMove = useCallback(
-        throttle(25, false, (event: MouseEvent) => {
+        throttle(25, (event: MouseEvent) => {
           const cursorIndex = getCursorIndex(event)
 
           if (cursorIndex === lastCursorIndex.current) {
