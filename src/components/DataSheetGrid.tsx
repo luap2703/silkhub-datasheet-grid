@@ -48,6 +48,7 @@ import { SelectionRect } from './SelectionRect'
 import { useRowHeights } from '../hooks/useRowHeights'
 import { useRowSelection } from '../hooks/useRowSelection'
 import { throttle } from 'throttle-debounce'
+import { getLoadingKey } from '../utils/loading-key'
 
 const DEFAULT_DATA: any[] = []
 const DEFAULT_COLUMNS: Column<any, any, any>[] = []
@@ -111,6 +112,7 @@ export const DataSheetGrid = React.memo(
 
         bottomReachedBuffer,
         onBottomReached,
+        onBottomDataReached,
 
         overscanRows,
       }: DataSheetGridProps<T>,
@@ -724,6 +726,11 @@ export const DataSheetGrid = React.memo(
             const copiedCells: Cell[] = []
 
             for (let row = min.row; row <= max.row; ++row) {
+              if (dataRef.current[row] !== null) {
+                // Insert nulls
+                copyData.push(Array(max.col - min.col + 1).fill(null))
+                continue
+              }
               copyData.push([])
 
               for (let col = min.col; col <= max.col; ++col) {
@@ -1007,7 +1014,9 @@ export const DataSheetGrid = React.memo(
 
       const getRowId = useCallback(
         (rowIndex: number) =>
-          typeof rowKey === 'function'
+          dataRef.current[rowIndex] === null
+            ? getLoadingKey(rowIndex)
+            : typeof rowKey === 'function'
             ? rowKey({
                 rowIndex: rowIndex,
                 rowData: dataRef.current[rowIndex],
@@ -1087,6 +1096,11 @@ export const DataSheetGrid = React.memo(
             refs.current.activeCell &&
             columns[refs.current.activeCell.col + 1].keepFocus
           ) {
+            return
+          }
+
+          // If the cell is null, a.k.a., not loaded, we should not do anything
+          if (cursorIndex?.row && dataRef.current[cursorIndex?.row] === null) {
             return
           }
 
@@ -2182,6 +2196,7 @@ export const DataSheetGrid = React.memo(
             getStickyColumnWidth={getStickyColumnWidth}
             bottomReachedBuffer={bottomReachedBuffer}
             onBottomReached={onBottomReached}
+            onBottomDataReached={onBottomDataReached}
             overscanRows={overscanRows}
           >
             <SelectionRect

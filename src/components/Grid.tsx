@@ -21,6 +21,7 @@ import { Cell as CellComponent } from './Cell'
 import { useMemoizedIndexCallback } from '../hooks/useMemoizedIndexCallback'
 import { HorizontalScrollShadow } from './HorizontalScrollShadow'
 import { throttle } from 'throttle-debounce'
+import { getLoadingKey } from '../utils/loading-key'
 
 const FallbackHeader: HeaderCellComponent<any> = () => <></>
 
@@ -51,6 +52,7 @@ export const Grid = <T extends any>({
   stopEditing,
   onScroll,
   onBottomReached,
+  onBottomDataReached,
   bottomReachedBuffer = 300,
 
   loading,
@@ -99,6 +101,7 @@ export const Grid = <T extends any>({
   onScroll?: React.UIEventHandler<HTMLDivElement>
 
   onBottomReached?: () => void
+  onBottomDataReached?: (index: number) => void
   bottomReachedBuffer?: number
 
   loading?: boolean
@@ -136,6 +139,9 @@ export const Grid = <T extends any>({
         ? loadingRowHeight ?? rowHeight(index).height
         : rowHeight(index).height,
     getItemKey: (index: number): React.Key => {
+      if (data[index] === null) {
+        return getLoadingKey(index)
+      }
       if (rowKey && !loading) {
         const row = data[index]
         if (typeof rowKey === 'function') {
@@ -291,12 +297,48 @@ export const Grid = <T extends any>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.length, outerHeight])
 
+  const firstNullIndex = useMemo(() => {
+    return data.findIndex((d) => d === null)
+  }, [data])
+
+  const firstNullIndexRef = useRef(firstNullIndex)
+  firstNullIndexRef.current = firstNullIndex
+
+  const onBottomDataReachedRef = useRef(onBottomDataReached)
+  onBottomDataReachedRef.current = onBottomDataReached
+
+  const rowVirtualizerRef = useRef(rowVirtualizer)
+  rowVirtualizerRef.current = rowVirtualizer
+
+  const bottomDataReachedHandler = useCallback(
+    throttle(250, false, () => {
+      // This should be a handler to figure out if a data point that is NULL is reached, aka rendered. If so, we should trigger a fetch for more data
+      // Get the index of the first row that is NULL
+      if (firstNullIndexRef.current === -1) return
+      if (!rowVirtualizerRef.current) return
+      console.log('bottomDataReachedHandler')
+
+      if (typeof rowVirtualizerRef.current.getVirtualIndexes !== 'function') {
+        console.log('rowVirtualizer', rowVirtualizerRef.current)
+        return
+      }
+      const renderedElements = rowVirtualizerRef.current.getVirtualIndexes()
+
+      // If the first NULL element is within the rendered elements, we should trigger a fetch for more data
+      if (renderedElements.includes(firstNullIndexRef.current)) {
+        onBottomDataReachedRef.current?.(firstNullIndexRef.current)
+      }
+    }),
+    [bottomReachedHandlerRef, rowVirtualizerRef.current]
+  )
+
   const onScrollHandler = useMemo(() => {
     return (e: React.UIEvent<HTMLDivElement>) => {
       onScroll?.(e)
       bottomReachedHandler()
+      bottomDataReachedHandler()
     }
-  }, [onScroll, bottomReachedHandler])
+  }, [onScroll, bottomReachedHandler, bottomDataReachedHandler])
 
   return (
     <div
@@ -425,12 +467,14 @@ export const Grid = <T extends any>({
                 const isStickyLeft =
                   hasStickyLeftColumn && columns[col.index].sticky === 'left'
 
-                if (loading && col.index === 0) return null
+                const isLoading = loading || data[row.index] === null
+
+                if (isLoading && col.index === 0) return null
 
                 return (
                   <CellComponent
                     key={col.key}
-                    gutter={!loading && col.index === 0}
+                    gutter={!isLoading && col.index === 0}
                     stickyRight={
                       hasStickyRightColumn && col.index === columns.length - 1
                     }
@@ -442,8 +486,8 @@ export const Grid = <T extends any>({
                       !columns[col.index].disablePadding && col.index !== 0
                     }
                     className={cx(
-                      !loading
-                        ? typeof colCellClassName === 'function' // Disable when loading to prevent any special behavior for loading view
+                      !isLoading
+                        ? typeof colCellClassName === 'function' // Disable when isLoading to prevent any special behavior for isLoading view
                           ? colCellClassName({
                               rowData: data[row.index],
                               rowIndex: row.index,
@@ -451,7 +495,7 @@ export const Grid = <T extends any>({
                             })
                           : colCellClassName
                         : undefined,
-                      !loading
+                      !isLoading
                         ? typeof cellClassName === 'function'
                           ? cellClassName({
                               rowData: data[row.index],
@@ -464,7 +508,7 @@ export const Grid = <T extends any>({
                     width={col.size}
                     left={col.start}
                   >
-                    {loading && col.index !== 0 ? (
+                    {isLoading && col.index !== 0 ? (
                       LoadingComponent
                     ) : (
                       <Component
