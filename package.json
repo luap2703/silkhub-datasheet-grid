@@ -17,7 +17,7 @@
     "format": "prettier --write src/. && prettier --write example/src/.",
     "lint": "eslint src/.",
     "test": "jest",
-    "prepare": "npm run build"
+    "prepare": "rm -f tsconfig.tsbuildinfo && rimraf ./dist && tsc && cpx \"src/**/*.css\" dist"
   },
   "keywords": [
     "react",

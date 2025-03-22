@@ -2,6 +2,7 @@ import React, {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -556,7 +557,7 @@ export const DataSheetGrid = React.memo(
         if (selectionCell) {
           scrollTo(selectionCell)
         }
-      }, [selectionCell, scrollTo])
+      }, [selectionCell])
 
       // Scroll to the active cell when it changes
       useEffect(() => {
@@ -564,7 +565,32 @@ export const DataSheetGrid = React.memo(
           scrollTo(activeCell)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, [activeCell?.col, activeCell?.row, scrollTo])
+      }, [activeCell?.col, activeCell?.row])
+
+      // If the selected cells or activeCell isn't there anymore, we need to reset the selection
+      useLayoutEffect(() => {
+        if (
+          selection &&
+          (selection.min.row >= data.length ||
+            selection.max.row >= data.length ||
+            selection.min.col >= columns.length - 1 ||
+            selection.max.col >= columns.length - 1)
+        ) {
+          console.debug('Selection out of bounds, resetting')
+          setSelectionCell(null)
+        }
+      }, [columns.length, data.length, selection, setSelectionCell])
+
+      useLayoutEffect(() => {
+        if (
+          activeCell &&
+          (activeCell.row >= data.length ||
+            activeCell.col >= columns.length - 1)
+        ) {
+          console.debug('Active cell out of bounds, resetting')
+          setActiveCell(null)
+        }
+      }, [activeCell, columns.length, data.length, setActiveCell])
 
       const setRowData = useCallback(
         (rowIndex: number, item: OperationResult<T>) => {
