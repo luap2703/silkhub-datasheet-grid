@@ -1,0 +1,1 @@
+{"version":3,"file":"HorizontalScrollShadow.d.ts","sourceRoot":"","sources":["../../src/components/HorizontalScrollShadow.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAkB,MAAM,OAAO,CAAA;AAEtC,eAAO,MAAM,sBAAsB,GAAI,sFAKpC;IACD,mBAAmB,EAAE,OAAO,CAAA;IAC5B,sBAAsB,EAAE,OAAO,CAAA;IAC/B,oBAAoB,EAAE,CAAC,IAAI,EAAE,MAAM,GAAG,OAAO,KAAK,MAAM,CAAA;IACxD,YAAY,EAAE,MAAM,CAAA;CACrB,sBAkBA,CAAA"}

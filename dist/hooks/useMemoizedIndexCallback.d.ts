@@ -1,0 +1,3 @@
+export declare const useMemoizedIndexCallback: <T extends Array<any>>(callbackFn: (index: number, ...args: T) => void, argsLength: number) => (index: number) => (...args: T) => void;
+export declare const useMemoizedDoubleIndexCallback: <T extends Array<any>>(callbackFn: (index: React.Key, index2: React.Key, ...args: T) => void, argsLength: number) => (index: React.Key, index2: React.Key) => (...args: T) => void;
+//# sourceMappingURL=useMemoizedIndexCallback.d.ts.map

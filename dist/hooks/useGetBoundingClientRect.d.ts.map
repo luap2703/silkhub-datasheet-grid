@@ -1,0 +1,1 @@
+{"version":3,"file":"useGetBoundingClientRect.d.ts","sourceRoot":"","sources":["../../src/hooks/useGetBoundingClientRect.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,SAAS,EAAgC,MAAM,OAAO,CAAA;AAI/D,eAAO,MAAM,wBAAwB,GACnC,KAAK,SAAS,CAAC,WAAW,GAAG,SAAS,GAAG,IAAI,CAAC,EAC9C,cAAW,wCA4BZ,CAAA"}
