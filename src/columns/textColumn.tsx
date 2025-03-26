@@ -138,10 +138,16 @@ const TextComponent = React.memo<
 
     const Input = (InputComponent || 'input') as React.FC<InputProps>
 
+    useEffect(() => {
+      console.log('rowData changed', rowData)
+    }, [rowData])
+
+    console.log('rd', asyncRef.current)
+
     return (
       <Input
         // We use an uncontrolled component for better performance
-        defaultValue={formatBlurredInput(rowData)}
+        value={formatBlurredInput(rowData)}
         className={cx('dsg-input', alignRight && 'dsg-input-align-right')}
         placeholder={active ? placeholder : undefined}
         // Important to prevent any undesired "tabbing"

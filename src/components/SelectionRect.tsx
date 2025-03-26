@@ -72,6 +72,7 @@ export const SelectionRect = React.memo<SelectionContextType>(
     rowHeight,
     activeCell,
     hasStickyRightColumn,
+    hasStickyLeftColumn,
     dataLength,
     viewWidth,
     viewHeight,
@@ -122,8 +123,8 @@ export const SelectionRect = React.memo<SelectionContextType>(
       const cells = selection
         ? [selection.min, selection.max]
         : activeCell
-        ? [activeCell]
-        : []
+          ? [activeCell]
+          : []
 
       const minCol = Math.min(...cells.map((cell) => cell.col))
       const maxCol = Math.max(...cells.map((cell) => cell.col))
@@ -296,9 +297,9 @@ export const SelectionRect = React.memo<SelectionContextType>(
             className={cx({
               'dsg-scrollable-view': true,
               'dsg-scrollable-view-t': !edges.top,
-              'dsg-scrollable-view-r': !edges.right,
+              'dsg-scrollable-view-r': !edges.right && !hasStickyRightColumn,
               'dsg-scrollable-view-b': !edges.bottom,
-              'dsg-scrollable-view-l': !edges.left,
+              'dsg-scrollable-view-l': !edges.left && !hasStickyLeftColumn,
             })}
             style={{
               top: headerRowHeight,

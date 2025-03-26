@@ -182,7 +182,7 @@ export const DataSheetGrid = React.memo(
       const { width, height } = useResizeDetector({
         targetRef: outerRef,
         refreshMode: 'throttle',
-        refreshRate: 150,
+        refreshRate: 50,
       })
 
       //  setHeightDiff(height ? displayHeight - height : 0)
@@ -755,7 +755,7 @@ export const DataSheetGrid = React.memo(
             const copiedCells: Cell[] = []
 
             for (let row = min.row; row <= max.row; ++row) {
-              if (dataRef.current[row] !== null) {
+              if (dataRef.current[row] === null) {
                 // Insert nulls
                 copyData.push(Array(max.col - min.col + 1).fill(null))
                 continue
