@@ -112,7 +112,14 @@ const TextComponent = react_1.default.memo(({ active, focus, rowData, setRowData
             ref.current.value = asyncRef.current.formatBlurredInput(rowData);
         }
     }, [focus, rowData]);
+    (0, react_1.useLayoutEffect)(() => {
+        // WHen the value from rowData changes a
+    }, [rowData]);
     const Input = (InputComponent || 'input');
+    (0, react_1.useEffect)(() => {
+        console.log('rowData changed', rowData);
+    }, [rowData]);
+    console.log('rd', asyncRef.current);
     return (react_1.default.createElement(Input
     // We use an uncontrolled component for better performance
     , { 
@@ -139,6 +146,7 @@ const TextComponent = react_1.default.memo(({ active, focus, rowData, setRowData
 TextComponent.displayName = 'TextComponent';
 exports.textColumn = createTextColumn();
 function createTextColumn({ placeholder, alignRight = false, continuousUpdates = true, deletedValue = null, parseUserInput = (value) => (value.trim() || null), formatBlurredInput = (value) => String(value !== null && value !== void 0 ? value : ''), formatInputOnFocus = (value) => String(value !== null && value !== void 0 ? value : ''), formatForCopy = (value) => String(value !== null && value !== void 0 ? value : ''), parsePastedValue = (value) => (value.replace(/[\n\r]+/g, ' ').trim() || null), InputComponent = 'input', } = {}) {
+    console.log('createTextColumn');
     return {
         component: TextComponent,
         columnData: {

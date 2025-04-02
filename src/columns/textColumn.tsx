@@ -134,6 +134,10 @@ const TextComponent = React.memo<
       }
     }, [focus, rowData])
 
+    useLayoutEffect(() => {
+      // WHen the value from rowData changes a
+    }, [rowData])
+
     type InputProps = React.ComponentProps<'input'> & { as?: React.ElementType }
 
     const Input = (InputComponent || 'input') as React.FC<InputProps>
@@ -147,7 +151,7 @@ const TextComponent = React.memo<
     return (
       <Input
         // We use an uncontrolled component for better performance
-        value={formatBlurredInput(rowData)}
+        defaultValue={formatBlurredInput(rowData)}
         className={cx('dsg-input', alignRight && 'dsg-input-align-right')}
         placeholder={active ? placeholder : undefined}
         // Important to prevent any undesired "tabbing"
@@ -193,6 +197,7 @@ export function createTextColumn<T = string | null>({
     (value.replace(/[\n\r]+/g, ' ').trim() || (null as unknown)) as T,
   InputComponent = 'input',
 }: TextColumnOptions<T> = {}): Partial<Column<T, TextColumnData<T>, string>> {
+  console.log('createTextColumn')
   return {
     component: TextComponent as unknown as CellComponent<T, TextColumnData<T>>,
     columnData: {

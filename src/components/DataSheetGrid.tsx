@@ -1107,13 +1107,10 @@ export const DataSheetGrid = React.memo(
             return
           }
 
-          const clickInside =
-            innerRef.current?.contains(event.target as Node) || false
-
-          if (!clickInside) return
-
           const rightClick =
             event.button === 2 || (event.button === 0 && event.ctrlKey)
+          const clickInside =
+            innerRef.current?.contains(event.target as Node) || false
 
           const cursorIndex = clickInside
             ? getCursorIndex(event, true, true)
@@ -1238,6 +1235,7 @@ export const DataSheetGrid = React.memo(
             lastEditingCellRef.current = refs.current.activeCell
           }
 
+          // Looking up if editing is disabled on the column
           const activeCol = refs.current.activeCell
             ? columns[refs.current.activeCell?.col + 1]
             : null

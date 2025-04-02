@@ -1,14 +1,16 @@
-import { useEffect } from 'react'
+import { RefObject, useEffect } from 'react'
 
 export const useDocumentEventListener = (
   type: string,
-  listener: (...args: any[]) => void
+  listener: (...args: any[]) => void,
+  target?: RefObject<HTMLElement | null> | null
 ) => {
   useEffect(() => {
-    document.addEventListener(type, listener)
+    const targetElement = target?.current || document
+    targetElement.addEventListener(type, listener)
 
     return () => {
-      document.removeEventListener(type, listener)
+      targetElement.removeEventListener(type, listener)
     }
   }, [listener, type])
 }

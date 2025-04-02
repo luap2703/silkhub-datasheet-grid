@@ -70,7 +70,7 @@ const buildClipPath = (top, right, bottom, left) => {
         .join(' '))
         .join(',')})`;
 };
-exports.SelectionRect = react_1.default.memo(({ columnWidths, columnRights, headerRowHeight, selection, rowHeight, activeCell, hasStickyRightColumn, dataLength, viewWidth, viewHeight, contentWidth, edges, isCellDisabled, isCellInteractive, editing, expandSelection, getStickyColumnWidth, getStickyColumnMaxIndex, }) => {
+exports.SelectionRect = react_1.default.memo(({ columnWidths, columnRights, headerRowHeight, selection, rowHeight, activeCell, hasStickyRightColumn, hasStickyLeftColumn, dataLength, viewWidth, viewHeight, contentWidth, edges, isCellDisabled, isCellInteractive, editing, expandSelection, getStickyColumnWidth, getStickyColumnMaxIndex, }) => {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
     const activeCellIsDisabled = activeCell ? isCellDisabled(activeCell) : false;
     const activeCellIsInteractive = activeCell
@@ -221,9 +221,9 @@ exports.SelectionRect = react_1.default.memo(({ columnWidths, columnRights, head
             react_1.default.createElement("div", { className: (0, classnames_1.default)({
                     'dsg-scrollable-view': true,
                     'dsg-scrollable-view-t': !edges.top,
-                    'dsg-scrollable-view-r': !edges.right,
+                    'dsg-scrollable-view-r': !edges.right && !hasStickyRightColumn,
                     'dsg-scrollable-view-b': !edges.bottom,
-                    'dsg-scrollable-view-l': !edges.left,
+                    'dsg-scrollable-view-l': !edges.left && !hasStickyLeftColumn,
                 }), style: {
                     top: headerRowHeight,
                     left: columnWidths[0],

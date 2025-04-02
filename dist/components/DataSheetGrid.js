@@ -115,7 +115,7 @@ exports.DataSheetGrid = react_1.default.memo(react_1.default.forwardRef(({ value
     const { width, height } = (0, react_resize_detector_1.useResizeDetector)({
         targetRef: outerRef,
         refreshMode: 'throttle',
-        refreshRate: 150,
+        refreshRate: 50,
     });
     //  setHeightDiff(height ? displayHeight - height : 0)
     const edges = (0, useEdges_1.useEdges)(outerRef, width, height);
@@ -526,7 +526,7 @@ exports.DataSheetGrid = react_1.default.memo(react_1.default.forwardRef(({ value
             const max = (selection === null || selection === void 0 ? void 0 : selection.max) || refs.current.activeCell;
             const copiedCells = [];
             for (let row = min.row; row <= max.row; ++row) {
-                if (dataRef.current[row] !== null) {
+                if (dataRef.current[row] === null) {
                     // Insert nulls
                     copyData.push(Array(max.col - min.col + 1).fill(null));
                     continue;
@@ -780,10 +780,8 @@ exports.DataSheetGrid = react_1.default.memo(react_1.default.forwardRef(({ value
         if (refs.current.contextMenu && contextMenuItems.length) {
             return;
         }
-        const clickInside = ((_a = innerRef.current) === null || _a === void 0 ? void 0 : _a.contains(event.target)) || false;
-        if (!clickInside)
-            return;
         const rightClick = event.button === 2 || (event.button === 0 && event.ctrlKey);
+        const clickInside = ((_a = innerRef.current) === null || _a === void 0 ? void 0 : _a.contains(event.target)) || false;
         const cursorIndex = clickInside
             ? getCursorIndex(event, true, true)
             : null;
@@ -865,6 +863,7 @@ exports.DataSheetGrid = react_1.default.memo(react_1.default.forwardRef(({ value
         if (clickOnActiveCell && !rightClick) {
             lastEditingCellRef.current = refs.current.activeCell;
         }
+        // Looking up if editing is disabled on the column
         const activeCol = refs.current.activeCell
             ? columns[((_f = refs.current.activeCell) === null || _f === void 0 ? void 0 : _f.col) + 1]
             : null;

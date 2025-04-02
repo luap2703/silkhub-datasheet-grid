@@ -2,11 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.useDocumentEventListener = void 0;
 const react_1 = require("react");
-const useDocumentEventListener = (type, listener) => {
+const useDocumentEventListener = (type, listener, target) => {
     (0, react_1.useEffect)(() => {
-        document.addEventListener(type, listener);
+        const targetElement = (target === null || target === void 0 ? void 0 : target.current) || document;
+        targetElement.addEventListener(type, listener);
         return () => {
-            document.removeEventListener(type, listener);
+            targetElement.removeEventListener(type, listener);
         };
     }, [listener, type]);
 };
