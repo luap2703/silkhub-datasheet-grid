@@ -63,20 +63,21 @@ headerRowHeight, rowHeight, rowKey, fullWidth, selection, activeCell, rowClassNa
             ? (loadingRowHeight !== null && loadingRowHeight !== void 0 ? loadingRowHeight : rowHeight(index).height)
             : rowHeight(index).height,
         getItemKey: (index) => {
-            if (data[index] === null) {
+            var _a;
+            const row = data[index];
+            if (row == null) {
                 return (0, loading_key_1.getLoadingKey)(index);
             }
             if (rowKey && !loading) {
-                const row = data[index];
                 if (typeof rowKey === 'function') {
-                    return rowKey({ rowData: row, rowIndex: index });
+                    return (_a = rowKey({ rowData: row, rowIndex: index })) !== null && _a !== void 0 ? _a : index;
                 }
                 else if (typeof rowKey === 'string' &&
                     row instanceof Object &&
                     rowKey in row) {
                     const key = row[rowKey];
                     if (typeof key === 'string' || typeof key === 'number') {
-                        return key;
+                        return key !== null && key !== void 0 ? key : index;
                     }
                 }
             }

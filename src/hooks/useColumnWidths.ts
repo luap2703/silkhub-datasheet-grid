@@ -88,7 +88,8 @@ export const getColumnWidths = (
 
 export const useColumnWidths = (
   columns: Column<any, any, any>[],
-  width?: number
+  width?: number,
+  fullWidth?: boolean
 ) => {
   const columnsHash = useMemo(
     () =>
@@ -103,7 +104,7 @@ export const useColumnWidths = (
   return useMemo(() => {
     if (width === undefined) {
       return {
-        fullWidth: false,
+        fullWidth: fullWidth ?? false,
         columnWidths: undefined,
         columnRights: undefined,
         totalWidth: undefined,

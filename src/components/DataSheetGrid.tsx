@@ -79,6 +79,7 @@ export const DataSheetGrid = React.memo(
         rowHeight = 40,
         headerRowHeight = typeof rowHeight === 'number' ? rowHeight : 40,
         gutterColumn,
+        fullWidth: forceFullWidth = false,
 
         rowKey,
         addRowsComponent: AddRowsComponent = (props) => <AddRows {...props} />,
@@ -194,7 +195,11 @@ export const DataSheetGrid = React.memo(
         totalWidth: contentWidth,
         columnWidths,
         columnRights,
-      } = useColumnWidths(columns, width)
+      } = useColumnWidths(
+        columns,
+        width ?? outerRef.current?.offsetWidth,
+        forceFullWidth
+      )
 
       // x,y coordinates of the right click
       const [contextMenu, setContextMenu] = useState<{

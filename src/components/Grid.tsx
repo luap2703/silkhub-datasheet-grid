@@ -149,13 +149,15 @@ export const Grid = <T extends any>({
         ? (loadingRowHeight ?? rowHeight(index).height)
         : rowHeight(index).height,
     getItemKey: (index: number): Key => {
-      if (data[index] === null) {
+      const row = data[index]
+
+      if (row == null) {
         return getLoadingKey(index)
       }
+
       if (rowKey && !loading) {
-        const row = data[index]
         if (typeof rowKey === 'function') {
-          return rowKey({ rowData: row, rowIndex: index })
+          return rowKey({ rowData: row, rowIndex: index }) ?? index
         } else if (
           typeof rowKey === 'string' &&
           row instanceof Object &&
@@ -163,7 +165,7 @@ export const Grid = <T extends any>({
         ) {
           const key = row[rowKey as keyof T]
           if (typeof key === 'string' || typeof key === 'number') {
-            return key
+            return key ?? index
           }
         }
       }

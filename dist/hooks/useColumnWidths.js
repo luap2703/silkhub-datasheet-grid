@@ -69,14 +69,14 @@ const getColumnWidths = (containerWidth, columns) => {
     return items.map(({ size }) => size);
 };
 exports.getColumnWidths = getColumnWidths;
-const useColumnWidths = (columns, width) => {
+const useColumnWidths = (columns, width, fullWidth) => {
     const columnsHash = (0, react_1.useMemo)(() => columns
         .map(({ basis, minWidth, maxWidth, grow, shrink }) => [basis, minWidth, maxWidth, grow, shrink].join(','))
         .join('|'), [columns]);
     return (0, react_1.useMemo)(() => {
         if (width === undefined) {
             return {
-                fullWidth: false,
+                fullWidth: fullWidth !== null && fullWidth !== void 0 ? fullWidth : false,
                 columnWidths: undefined,
                 columnRights: undefined,
                 totalWidth: undefined,

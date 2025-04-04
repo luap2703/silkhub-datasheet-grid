@@ -72,8 +72,8 @@ const DEFAULT_CREATE_ROW = () => ({});
 const DEFAULT_EMPTY_CALLBACK = () => null;
 const DEFAULT_DUPLICATE_ROW = ({ rowData, }) => (Object.assign({}, rowData));
 // eslint-disable-next-line react/display-name
-exports.DataSheetGrid = react_1.default.memo(react_1.default.forwardRef(({ value: data = DEFAULT_DATA, className, style, height: maxHeight = 400, onChange = DEFAULT_EMPTY_CALLBACK, columns: rawColumns = DEFAULT_COLUMNS, rowHeight = 40, headerRowHeight = typeof rowHeight === 'number' ? rowHeight : 40, gutterColumn, rowKey, addRowsComponent: AddRowsComponent = (props) => react_1.default.createElement(AddRows_1.AddRows, Object.assign({}, props)), createRow = DEFAULT_CREATE_ROW, autoAddRow = false, lockRows = false, disableExpandSelection = false, disableSmartDelete = false, duplicateRow = DEFAULT_DUPLICATE_ROW, contextMenuComponent: _ContextMenuComponent, disableContextMenu: disableContextMenuRaw = false, onFocus = DEFAULT_EMPTY_CALLBACK, onBlur = DEFAULT_EMPTY_CALLBACK, onActiveCellChange = DEFAULT_EMPTY_CALLBACK, onSelectionChange = DEFAULT_EMPTY_CALLBACK, rowClassName, cellClassName, onScroll, loading = false, loadingRowComponent = null, loadingRowCount = 10, loadingRowHeight, enforceLoading = false, rowSelection, onRowSelectionChange, onCellCopy, columnVisibilityModel, onColumnVisibilityChange, bottomReachedBuffer, onBottomReached, onBottomDataReached, onBottomThrottleRate = 1000, overscanRows, }, ref) => {
-    var _a, _b, _c, _d, _e;
+exports.DataSheetGrid = react_1.default.memo(react_1.default.forwardRef(({ value: data = DEFAULT_DATA, className, style, height: maxHeight = 400, onChange = DEFAULT_EMPTY_CALLBACK, columns: rawColumns = DEFAULT_COLUMNS, rowHeight = 40, headerRowHeight = typeof rowHeight === 'number' ? rowHeight : 40, gutterColumn, fullWidth: forceFullWidth = false, rowKey, addRowsComponent: AddRowsComponent = (props) => react_1.default.createElement(AddRows_1.AddRows, Object.assign({}, props)), createRow = DEFAULT_CREATE_ROW, autoAddRow = false, lockRows = false, disableExpandSelection = false, disableSmartDelete = false, duplicateRow = DEFAULT_DUPLICATE_ROW, contextMenuComponent: _ContextMenuComponent, disableContextMenu: disableContextMenuRaw = false, onFocus = DEFAULT_EMPTY_CALLBACK, onBlur = DEFAULT_EMPTY_CALLBACK, onActiveCellChange = DEFAULT_EMPTY_CALLBACK, onSelectionChange = DEFAULT_EMPTY_CALLBACK, rowClassName, cellClassName, onScroll, loading = false, loadingRowComponent = null, loadingRowCount = 10, loadingRowHeight, enforceLoading = false, rowSelection, onRowSelectionChange, onCellCopy, columnVisibilityModel, onColumnVisibilityChange, bottomReachedBuffer, onBottomReached, onBottomDataReached, onBottomThrottleRate = 1000, overscanRows, }, ref) => {
+    var _a, _b, _c, _d, _e, _f;
     if (!enforceLoading) {
         loading = loading && data.length === 0;
     }
@@ -119,7 +119,7 @@ exports.DataSheetGrid = react_1.default.memo(react_1.default.forwardRef(({ value
     });
     //  setHeightDiff(height ? displayHeight - height : 0)
     const edges = (0, useEdges_1.useEdges)(outerRef, width, height);
-    const { fullWidth, totalWidth: contentWidth, columnWidths, columnRights, } = (0, useColumnWidths_1.useColumnWidths)(columns, width);
+    const { fullWidth, totalWidth: contentWidth, columnWidths, columnRights, } = (0, useColumnWidths_1.useColumnWidths)(columns, width !== null && width !== void 0 ? width : (_a = outerRef.current) === null || _a === void 0 ? void 0 : _a.offsetWidth, forceFullWidth);
     // x,y coordinates of the right click
     const [contextMenu, setContextMenu] = (0, react_1.useState)(null);
     // Items of the context menu
@@ -1485,7 +1485,7 @@ exports.DataSheetGrid = react_1.default.memo(react_1.default.forwardRef(({ value
         getActiveCell: () => refs.current.activeCell,
         getCellSelection: () => selectionRef.current,
         getColumnVisibilityModel: () => { var _a; return (_a = columnVisibilityModelRef.current) !== null && _a !== void 0 ? _a : new Set(); },
-        setColumnVisibilityModel: (_a = onColumnVisibilityChangeRef.current) !== null && _a !== void 0 ? _a : (() => undefined),
+        setColumnVisibilityModel: (_b = onColumnVisibilityChangeRef.current) !== null && _b !== void 0 ? _b : (() => undefined),
         getColumnWidths: () => columnWidthsRef.current,
     });
     tableCallbacks.current.setSelection = _setSelection;
@@ -1517,13 +1517,13 @@ exports.DataSheetGrid = react_1.default.memo(react_1.default.forwardRef(({ value
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        (_b = selection === null || selection === void 0 ? void 0 : selection.min.col) !== null && _b !== void 0 ? _b : activeCell === null || activeCell === void 0 ? void 0 : activeCell.col,
+        (_c = selection === null || selection === void 0 ? void 0 : selection.min.col) !== null && _c !== void 0 ? _c : activeCell === null || activeCell === void 0 ? void 0 : activeCell.col,
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        (_c = selection === null || selection === void 0 ? void 0 : selection.min.row) !== null && _c !== void 0 ? _c : activeCell === null || activeCell === void 0 ? void 0 : activeCell.row,
+        (_d = selection === null || selection === void 0 ? void 0 : selection.min.row) !== null && _d !== void 0 ? _d : activeCell === null || activeCell === void 0 ? void 0 : activeCell.row,
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        (_d = selection === null || selection === void 0 ? void 0 : selection.max.col) !== null && _d !== void 0 ? _d : activeCell === null || activeCell === void 0 ? void 0 : activeCell.col,
+        (_e = selection === null || selection === void 0 ? void 0 : selection.max.col) !== null && _e !== void 0 ? _e : activeCell === null || activeCell === void 0 ? void 0 : activeCell.col,
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        (_e = selection === null || selection === void 0 ? void 0 : selection.max.row) !== null && _e !== void 0 ? _e : activeCell === null || activeCell === void 0 ? void 0 : activeCell.row,
+        (_f = selection === null || selection === void 0 ? void 0 : selection.max.row) !== null && _f !== void 0 ? _f : activeCell === null || activeCell === void 0 ? void 0 : activeCell.row,
         activeCell === null || activeCell === void 0 ? void 0 : activeCell.col,
         activeCell === null || activeCell === void 0 ? void 0 : activeCell.row,
         columns,

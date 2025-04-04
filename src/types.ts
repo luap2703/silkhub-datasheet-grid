@@ -257,6 +257,8 @@ export type DataSheetGridProps<T> = {
   onCellCopy?: (cells: Cell[], textPlain: string, textHtml: string) => void
 
   overscanRows?: number
+
+  fullWidth?: boolean
 }
 
 export type ColumnVisibilityModel = Set<string>
