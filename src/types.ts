@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react'
+import React, { ReactNode, RefObject } from 'react'
 
 export type Cell = {
   col: number
@@ -190,7 +190,14 @@ export type Operation = {
   toRowIndex: number
 }
 
-export type DataSheetGridProps<T> = {
+export type RowType =
+  | {
+      isGroup?: boolean
+    }
+  | null
+  | undefined
+
+export type DataSheetGridProps<T extends RowType> = {
   value?: T[]
   style?: React.CSSProperties
   className?: string
@@ -259,7 +266,22 @@ export type DataSheetGridProps<T> = {
   overscanRows?: number
 
   fullWidth?: boolean
+
+  groupRowComponent?: GroupRowComponent<T>
+  groupRowComponentProps?: GroupRowComponentProps<T>
 }
+
+export type GroupRowComponentProps<T> = Partial<
+  Omit<Column<T, any, any>, 'component' | 'title'> & {
+    keepColsLeft?: number
+    keepColsRight?: number
+  }
+>
+
+export type GroupRowComponent<T> = (v: {
+  rowData: T
+  rowIndex: number
+}) => React.ReactNode
 
 export type ColumnVisibilityModel = Set<string>
 export type ColumnVisibilityModelChangeHandler = (
@@ -289,6 +311,7 @@ export type DataSheetGridRef = {
   selection: SelectionWithId | null
   setActiveCell: (activeCell: CellWithIdInput | null) => void
   setSelection: (selection: SelectionWithIdInput | null) => void
+  scrollRef: RefObject<HTMLDivElement | null>
 }
 
 export type TableCallbackProps = {

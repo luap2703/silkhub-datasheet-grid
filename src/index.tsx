@@ -8,6 +8,7 @@ import {
   ContextMenuComponentProps as ContextMenuComponentPropsBase,
   ContextMenuItem as ContextMenuItemBase,
   DataSheetGridRef as DataSheetGridRefBase,
+  RowType,
 } from './types'
 import { DataSheetGrid as DataSheetGridBase } from './components/DataSheetGrid'
 import { StaticDataSheetGrid as StaticDataSheetGridBase } from './components/StaticDataSheetGrid'
@@ -17,7 +18,8 @@ export type Column<T = any, C = any, PasteValue = string> = Partial<
 >
 export type CellComponent<T = any, C = any> = CellComponentBase<T, C>
 export type CellProps<T = any, C = any> = CellPropsBase<T, C>
-export type DataSheetGridProps<T = any> = DataSheetGridPropsBase<T>
+export type DataSheetGridProps<T extends RowType = any> =
+  DataSheetGridPropsBase<T>
 export type AddRowsComponentProps = AddRowsComponentPropsBase
 export type SimpleColumn<T = any, C = any> = SimpleColumnBase<T, C>
 export type ContextMenuComponentProps = ContextMenuComponentPropsBase

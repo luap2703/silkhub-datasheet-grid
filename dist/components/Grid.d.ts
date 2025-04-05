@@ -1,6 +1,6 @@
 import React, { ReactNode, RefObject } from 'react';
-import { Cell, Column, ContextMenuItem, DataSheetGridProps, Selection, TableCallbackProps } from '../types';
-export declare const Grid: <T extends any>({ data, columns, outerRef, innerRef, columnWidths, hasStickyRightColumn, hasStickyLeftColumn, headerRowHeight, rowHeight, rowKey, fullWidth, selection, activeCell, rowClassName, cellClassName, children, editing, getContextMenuItems, setRowData, deleteRows, duplicateRows, insertRowAfter, stopEditing, onScroll, onBottomReached, onBottomDataReached, bottomReachedBuffer, loading, loadingRowComponent, loadingRowCount, loadingRowHeight, selectedRows, selectRows, toggleSelection, selectAllRows, getRowId, table, getStickyColumnWidth, outerHeight, overscanRows, }: {
+import { Cell, Column, ContextMenuItem, DataSheetGridProps, GroupRowComponent, GroupRowComponentProps, RowType, Selection, TableCallbackProps } from '../types';
+export declare const Grid: <T extends RowType>({ data, columns, outerRef, innerRef, columnWidths, hasStickyRightColumn, hasStickyLeftColumn, headerRowHeight, rowHeight, rowKey, fullWidth, selection, activeCell, rowClassName, cellClassName, children, editing, getContextMenuItems, setRowData, deleteRows, duplicateRows, insertRowAfter, stopEditing, onScroll, onBottomReached, onBottomDataReached, bottomReachedBuffer, loading, loadingRowComponent, loadingRowCount, loadingRowHeight, selectedRows, selectRows, toggleSelection, selectAllRows, getRowId, table, getStickyColumnWidth, outerHeight, overscanRows, groupRowComponent, groupRowComponentProps, }: {
     data: T[];
     columns: Column<T, any, any>[];
     outerRef: RefObject<HTMLDivElement | null>;
@@ -46,5 +46,7 @@ export declare const Grid: <T extends any>({ data, columns, outerRef, innerRef, 
     table: TableCallbackProps;
     getStickyColumnWidth: (side: "left" | "right") => number;
     overscanRows: number | undefined;
+    groupRowComponent?: GroupRowComponent<T>;
+    groupRowComponentProps?: GroupRowComponentProps<T>;
 }) => React.JSX.Element;
 //# sourceMappingURL=Grid.d.ts.map

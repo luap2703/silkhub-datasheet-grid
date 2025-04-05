@@ -1,0 +1,77 @@
+@reference "./colors.css";
+
+@layer components {
+  .data-table-cell {
+    @apply relative;
+
+    @apply focus-visible:ring-ring flex flex-grow-0 select-none before:absolute focus-visible:ring-0 focus-visible:outline-0 focus-visible:outline-none;
+
+    /* Border on different sides based on data attributes */
+    &[data-left="true"]::before {
+      @apply border-l;
+    }
+    &[data-top="true"]::before {
+      @apply border-t;
+    }
+    &[data-right="true"]::before {
+      @apply border-r;
+    }
+    &[data-bottom="true"]::before {
+      @apply border-b;
+    }
+
+    /* Rounded corners based on top, bottom, left, right attributes */
+    &[data-top="true"][data-left="true"]::before {
+      @apply rounded-ss-sm;
+    }
+    &[data-top="true"][data-right="true"]::before {
+      @apply rounded-se-sm;
+    }
+    &[data-bottom="true"][data-left="true"]::before {
+      @apply rounded-es-sm;
+    }
+    &[data-bottom="true"][data-right="true"]::before {
+      @apply rounded-ee-sm;
+    }
+
+    /* After pseudo-element for focus and focus-within states */
+    &:focus {
+      @apply after:pointer-events-none;
+    }
+    &:focus-within {
+      @apply after:pointer-events-none after:border-transparent;
+    }
+
+    &:focus:after {
+      @apply absolute inset-[-1px] left-0 rounded-sm border select-none;
+    }
+    &:focus[data-editable="true"]::after {
+      @apply border-indigo;
+    }
+    &[data-editable="true"]:focus-within::after {
+      @apply border-primary/40 absolute inset-[-1px] left-0 rounded-sm border select-none;
+    }
+    &[data-editable="true"]:focus-within::after {
+      @apply border-indigo;
+    }
+
+    &[data-warning="true"] {
+      @apply before:border-warning-300/50 before:pointer-events-none before:absolute before:inset-[-1px] before:rounded-sm before:border before:select-none;
+      &[data-is-selected="true"] {
+        @apply before:left-0;
+      }
+    }
+
+    &[data-error="true"] {
+      @apply before:border-error-300/50 before:pointer-events-none before:absolute before:inset-[-1px] before:rounded-sm before:border before:select-none;
+      &[data-is-selected="true"] {
+        @apply before:left-0;
+      }
+    }
+
+    &[data-is-selected="true"] {
+      @apply before:border-primary/40 data-[editable=true]:before:border-indigo/50;
+      @apply before:pointer-events-none before:absolute before:inset-[-1px] before:left-0 before:select-none;
+    }
+  }
+}

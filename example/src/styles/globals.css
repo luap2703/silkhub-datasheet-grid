@@ -1,0 +1,74 @@
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+
+/*@plugin "tailwindcss-animate";*/
+
+@import './clerk.css';
+
+@import './sheet.css';
+
+@import './theme.css';
+
+@import './table.css';
+
+@layer base {
+  @import '../../../src/style.css';
+}
+
+@custom-variant dark (&:is(.dark *));
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 40px var(--background) inset !important;
+  background-color: var(--background) !important;
+}
+input:-internal-autofill-selected {
+  background-color: var(--background) !important;
+}
+
+@layer base {
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@layer base {
+  dialog {
+    margin: auto;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  .lucide {
+    /* Change this! */
+    stroke-width: 1;
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+  }
+
+  .lucide * {
+    vector-effect: non-scaling-stroke;
+  }
+}
+
+@variant state-open-svg {
+  &[data-state='open'] svg {
+    @slot;
+  }
+
+  &[data-state='open'] * svg {
+    @slot;
+  }
+}

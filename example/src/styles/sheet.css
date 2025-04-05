@@ -1,0 +1,154 @@
+@reference "./theme.css";
+
+@layer components {
+  .silk-table {
+    --dsg-selection-border-color: var(--color-indigo-border);
+    --dsg-border-color: var(--color-border);
+    --dsg-selection-disabled-border-color: var(--color-border);
+    --dsg-selection-passive-border-color: var(--color-border);
+    --dsg-selection-disabled-background-color: var(--color-background-muted);
+    --dsg-cell-disabled-background-color: var(--color-background-muted);
+    --dsg-cell-passive-background-color: var(--color-background);
+    --dsg-cell-passive-background-color: var(--color-background);
+
+    --dsg-header-text-color: var(--color-primary);
+    --dsg-header-active-text-color: var(--color-primary);
+
+    --dsg-cell-background-color: var(--color-background);
+    --dsg-selection-background-color: "transparent";
+    --dsg-cell-disabled-background-color: var(--color-background-muted);
+    --dsg-selection-disabled-background-color: "transparent";
+
+    --dsg-selection-passive-border-color: var(--color-border);
+
+    --dsg-selection-border-width: 2px;
+
+    --dsg-scroll-shadow-width: 0px;
+    --dsg-scroll-shadow-color: var(--color-border);
+    --dsg-row-selection-background-color: var(--color-indigo-bg) / 20;
+
+    --dsg-selection-border-radius: theme("borderRadius.md");
+
+    @apply text-sm;
+
+    @apply flex flex-col;
+
+    @apply bg-background;
+
+    @apply overflow-hidden;
+
+    .dsg-cell-header {
+      @apply text-sm font-medium;
+    }
+    /* Required to make header truncate */
+    .dsg-cell-header,
+    .dsg-cell-header-container {
+      @apply truncate;
+    }
+    /*
+    .dsg-container[data-aligned="true"] .dsg-cell {
+      transition-property: width, left, right;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      transition-duration: 150ms;
+    }*/
+
+    .dsg-cell-disabled {
+      background: none;
+      @apply bg-background-muted;
+    }
+
+    .dsg-container {
+      @apply text-primary;
+
+      @apply max-h-full flex-auto overflow-scroll;
+
+      background: none;
+
+      border: none;
+
+      @supports not selector(::-webkit-scrollbar) {
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-border) var(--color-background-muted);
+      }
+      @supports selector(::-webkit-scrollbar) {
+        &::-webkit-scrollbar-track {
+          @apply bg-transparent;
+        }
+
+        &::-webkit-scrollbar-corner {
+          @apply bg-transparent;
+        }
+      }
+    }
+
+    .dsg-row-header {
+      @apply sticky top-0;
+    }
+
+    .dsg-input {
+      @apply text-sm;
+    }
+
+    .dsg-active-cell {
+      @apply rounded-md;
+      @apply transition-all;
+      @apply border-indigo;
+    }
+    .dsg-active-cell-disabled {
+      @apply border-border;
+    }
+
+    .dsg-active-cell-passive {
+      @apply border-indigo-border;
+    }
+
+    .dsg-active-cell-focus {
+      @apply border-indigo;
+    }
+
+    .dsg-selection-col-marker {
+      @apply bg-indigo-border;
+    }
+
+    .dsg-cell-header {
+      @apply hover:bg-accent-light transition-colors;
+    }
+
+    .dsg-container:not([data-state="loading"]) .dsg-cell {
+      &:nth-child(2) {
+        @apply border-l-0;
+      }
+      &:last-child {
+        @apply border-r-0;
+        @apply pr-4;
+      }
+    }
+
+    .dsg-row:first-child .dsg-cell {
+      @apply border-t-0;
+    }
+
+    .dsg-row-selected .dsg-cell {
+      --dsg-cell-background-color: var(--color-indigo-bg) / 20;
+      background-color: var(--dsg-cell-background-color);
+    }
+
+    .dsg-selection-sticky-left-rect {
+      clip-path: none !important;
+      border-right-width: 0 !important;
+    }
+
+    .dsg-cell-disabled,
+    .dsg-row-selected {
+      .dsg-input {
+        background: none;
+        @apply bg-none;
+        @apply truncate;
+      }
+    }
+
+    .dsg-cell-sticky.dsg-cell-header:not(.dsg-cell-header-active) {
+      box-shadow: 0 1px 0 var(--dsg-border-color);
+    }
+  }
+}

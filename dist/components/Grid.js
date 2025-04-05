@@ -45,10 +45,11 @@ const useMemoizedIndexCallback_1 = require("../hooks/useMemoizedIndexCallback");
 const HorizontalScrollShadow_1 = require("./HorizontalScrollShadow");
 const throttle_debounce_1 = require("throttle-debounce");
 const loading_key_1 = require("../utils/loading-key");
+const GridGroupRow_1 = require("./GridGroupRow");
 const FallbackHeader = () => react_1.default.createElement(react_1.default.Fragment, null);
 const Grid = ({ data, columns, outerRef, innerRef, columnWidths, hasStickyRightColumn, hasStickyLeftColumn, 
 //displayHeight,
-headerRowHeight, rowHeight, rowKey, fullWidth, selection, activeCell, rowClassName, cellClassName, children, editing, getContextMenuItems, setRowData, deleteRows, duplicateRows, insertRowAfter, stopEditing, onScroll, onBottomReached, onBottomDataReached, bottomReachedBuffer = 300, loading, loadingRowComponent, loadingRowCount = 10, loadingRowHeight, selectedRows, selectRows, toggleSelection, selectAllRows, getRowId, table, getStickyColumnWidth, outerHeight, overscanRows = 10, }) => {
+headerRowHeight, rowHeight, rowKey, fullWidth, selection, activeCell, rowClassName, cellClassName, children, editing, getContextMenuItems, setRowData, deleteRows, duplicateRows, insertRowAfter, stopEditing, onScroll, onBottomReached, onBottomDataReached, bottomReachedBuffer = 300, loading, loadingRowComponent, loadingRowCount = 10, loadingRowHeight, selectedRows, selectRows, toggleSelection, selectAllRows, getRowId, table, getStickyColumnWidth, outerHeight, overscanRows = 10, groupRowComponent, groupRowComponentProps, }) => {
     var _a, _b, _c, _d;
     const dataRef = (0, react_1.useRef)(data);
     dataRef.current = data;
@@ -216,6 +217,9 @@ headerRowHeight, rowHeight, rowKey, fullWidth, selection, activeCell, rowClassNa
             bottomDataReachedHandler();
         };
     }, [onScroll, bottomReachedHandler, bottomDataReachedHandler]);
+    const GroupRowComponent = (0, react_1.useMemo)(() => {
+        return groupRowComponent;
+    }, [groupRowComponent]);
     // Also trigger bottomReacheed if layouting is done and the container is not scrollable bc the content is smaller than the container
     (0, react_1.useEffect)(() => {
         var _a, _b;
@@ -254,6 +258,7 @@ headerRowHeight, rowHeight, rowKey, fullWidth, selection, activeCell, rowClassNa
                         react_1.default.createElement(Header, { columnData: columns[col.index].columnData, selectedRows: _selectedRows, selectRows: selectRows, selectAllRows: selectAllRows, table: table }))));
             }))),
             rowVirtualizer.getVirtualItems().map((row) => {
+                var _a;
                 const rowActive = Boolean(row.index >= (selectionMinRow !== null && selectionMinRow !== void 0 ? selectionMinRow : Infinity) &&
                     row.index <= (selectionMaxRow !== null && selectionMaxRow !== void 0 ? selectionMaxRow : -Infinity));
                 const rowSelected = selectedRows.has(row.key.toString());
@@ -266,7 +271,7 @@ headerRowHeight, rowHeight, rowKey, fullWidth, selection, activeCell, rowClassNa
                         height: row.size,
                         top: row.start,
                         width: fullWidth ? '100%' : colVirtualizer.getTotalSize(),
-                    } }, colVirtualizer.getVirtualItems().map((col) => {
+                    } }, ((_a = data[row.index]) === null || _a === void 0 ? void 0 : _a.isGroup) && GroupRowComponent ? (react_1.default.createElement(GridGroupRow_1.GridGroupRow, { colVirtualizer: colVirtualizer, columns: columns, data: data, row: row, rowIndex: row.index, loading: loading, LoadingComponent: LoadingComponent, hasStickyLeftColumn: hasStickyLeftColumn, hasStickyRightColumn: hasStickyRightColumn, activeCell: activeCell, editing: editing, getContextMenuItems: getContextMenuItems, deleteGivenRow: deleteGivenRow, duplicateGivenRow: duplicateGivenRow, stopEditing: stopEditing, insertAfterGivenRow: insertAfterGivenRow, setGivenRowData: setGivenRowData, rowSelected: Boolean(rowSelected), selectRows: selectRows, toggleGivenRow: toggleGivenRow, getRowId: getRowId, table: table, groupRowComponentProps: groupRowComponentProps, GroupRowComponent: GroupRowComponent, rowActive: rowActive, fullWidth: fullWidth, cellClassName: cellClassName })) : (colVirtualizer.getVirtualItems().map((col) => {
                     const colCellClassName = columns[col.index].cellClassName;
                     const disabled = columns[col.index].disabled;
                     const Component = columns[col.index].component;
@@ -305,8 +310,8 @@ headerRowHeight, rowHeight, rowKey, fullWidth, selection, activeCell, rowClassNa
                                     columnId: columns[col.index].id,
                                 })
                                 : cellClassName
-                            : undefined), width: col.size, left: col.start }, isLoading && col.index !== 0 ? (LoadingComponent) : (react_1.default.createElement(Component, { rowData: data[row.index], getContextMenuItems: getContextMenuItems, disabled: cellDisabled, rowId: row.key.toString(), active: cellIsActive, columnIndex: col.index - 1, rowIndex: row.index, focus: cellIsActive && editing, deleteRow: deleteGivenRow(row.index), duplicateRow: duplicateGivenRow(row.index), stopEditing: stopEditing, insertRowBelow: insertAfterGivenRow(row.index), setRowData: setGivenRowData(row.index), columnData: columns[col.index].columnData, selected: rowSelected, selectRows: selectRows, toggleSelection: toggleGivenRow(row.index), getRowId: getRowId, table: table }))));
-                })));
+                            : undefined), width: col.size, left: col.start }, isLoading && col.index !== 0 ? (LoadingComponent) : (react_1.default.createElement(Component, { rowData: data[row.index], getContextMenuItems: getContextMenuItems, disabled: cellDisabled, rowId: row.key.toString(), active: cellIsActive, columnIndex: col.index - 1, rowIndex: row.index, focus: cellIsActive && editing, deleteRow: deleteGivenRow(row.index), duplicateRow: duplicateGivenRow(row.index), stopEditing: stopEditing, insertRowBelow: insertAfterGivenRow(row.index), setRowData: setGivenRowData(row.index), columnData: columns[col.index].columnData, selected: Boolean(rowSelected), selectRows: selectRows, toggleSelection: toggleGivenRow(row.index), getRowId: getRowId, table: table }))));
+                }))));
             }),
             children,
             react_1.default.createElement(HorizontalScrollShadow_1.HorizontalScrollShadow, { hasStickyLeftColumn: hasStickyLeftColumn, getStickyColumnWidth: getStickyColumnWidth, isHorizontallyScrolled: isHorizontallyScrolled, headerHeight: headerRowHeight }))));

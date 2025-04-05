@@ -1,9 +1,9 @@
-import { DataSheetGridProps } from '../types'
+import { DataSheetGridProps, RowType } from '../types'
 import { useMemo, useRef, useState } from 'react'
 
 type RowSize = { height: number; top: number }
 
-export const useRowHeights = <T extends any>({
+export const useRowHeights = <T extends RowType>({
   value,
   rowHeight,
 }: Required<Pick<DataSheetGridProps<T>, 'value' | 'rowHeight'>>) => {

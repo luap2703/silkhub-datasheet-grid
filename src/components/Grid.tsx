@@ -12,7 +12,10 @@ import {
   Column,
   ContextMenuItem,
   DataSheetGridProps,
+  GroupRowComponent,
+  GroupRowComponentProps,
   HeaderCellComponent,
+  RowType,
   Selection,
   TableCallbackProps,
 } from '../types'
@@ -22,12 +25,13 @@ import { useMemoizedIndexCallback } from '../hooks/useMemoizedIndexCallback'
 import { HorizontalScrollShadow } from './HorizontalScrollShadow'
 import { throttle } from 'throttle-debounce'
 import { getLoadingKey } from '../utils/loading-key'
+import { GridGroupRow } from './GridGroupRow'
 
 declare type Key = string | number
 
 const FallbackHeader: HeaderCellComponent<any> = () => <></>
 
-export const Grid = <T extends any>({
+export const Grid = <T extends RowType>({
   data,
   columns,
   outerRef,
@@ -75,6 +79,9 @@ export const Grid = <T extends any>({
 
   outerHeight,
   overscanRows = 10,
+
+  groupRowComponent,
+  groupRowComponentProps,
 }: {
   data: T[]
   columns: Column<T, any, any>[]
@@ -128,6 +135,9 @@ export const Grid = <T extends any>({
   getStickyColumnWidth: (side: 'left' | 'right') => number
 
   overscanRows: number | undefined
+
+  groupRowComponent?: GroupRowComponent<T>
+  groupRowComponentProps?: GroupRowComponentProps<T>
 }) => {
   const dataRef = useRef(data)
   dataRef.current = data
@@ -163,7 +173,7 @@ export const Grid = <T extends any>({
           row instanceof Object &&
           rowKey in row
         ) {
-          const key = row[rowKey as keyof T]
+          const key = (row as NonNullable<T>)[rowKey as keyof T]
           if (typeof key === 'string' || typeof key === 'number') {
             return key ?? index
           }
@@ -344,6 +354,10 @@ export const Grid = <T extends any>({
     }
   }, [onScroll, bottomReachedHandler, bottomDataReachedHandler])
 
+  const GroupRowComponent = useMemo(() => {
+    return groupRowComponent
+  }, [groupRowComponent])
+
   // Also trigger bottomReacheed if layouting is done and the container is not scrollable bc the content is smaller than the container
   useEffect(() => {
     if (isAtBottom.current) return
@@ -461,103 +475,135 @@ export const Grid = <T extends any>({
                 width: fullWidth ? '100%' : colVirtualizer.getTotalSize(),
               }}
             >
-              {colVirtualizer.getVirtualItems().map((col) => {
-                const colCellClassName = columns[col.index].cellClassName
-                const disabled = columns[col.index].disabled
-                const Component = columns[col.index].component
-                const cellDisabled =
-                  disabled === true ||
-                  (typeof disabled === 'function' &&
-                    disabled({
-                      rowData: data[row.index],
-                      rowIndex: row.index,
-                    }))
+              {data[row.index]?.isGroup && GroupRowComponent ? (
+                <GridGroupRow
+                  colVirtualizer={colVirtualizer}
+                  columns={columns}
+                  data={data}
+                  row={row}
+                  rowIndex={row.index}
+                  loading={loading}
+                  LoadingComponent={LoadingComponent}
+                  hasStickyLeftColumn={hasStickyLeftColumn}
+                  hasStickyRightColumn={hasStickyRightColumn}
+                  activeCell={activeCell}
+                  editing={editing}
+                  getContextMenuItems={getContextMenuItems}
+                  deleteGivenRow={deleteGivenRow}
+                  duplicateGivenRow={duplicateGivenRow}
+                  stopEditing={stopEditing}
+                  insertAfterGivenRow={insertAfterGivenRow}
+                  setGivenRowData={setGivenRowData}
+                  rowSelected={Boolean(rowSelected)}
+                  selectRows={selectRows}
+                  toggleGivenRow={toggleGivenRow}
+                  getRowId={getRowId}
+                  table={table}
+                  groupRowComponentProps={groupRowComponentProps}
+                  GroupRowComponent={GroupRowComponent}
+                  rowActive={rowActive}
+                  fullWidth={fullWidth}
+                  cellClassName={cellClassName}
+                />
+              ) : (
+                colVirtualizer.getVirtualItems().map((col) => {
+                  const colCellClassName = columns[col.index].cellClassName
+                  const disabled = columns[col.index].disabled
+                  const Component = columns[col.index].component
+                  const cellDisabled =
+                    disabled === true ||
+                    (typeof disabled === 'function' &&
+                      disabled({
+                        rowData: data[row.index],
+                        rowIndex: row.index,
+                      }))
 
-                const interactive = columns[col.index].interactive
-                const cellInteractive =
-                  interactive === true ||
-                  (typeof interactive === 'function' &&
-                    interactive({
-                      rowData: data[row.index],
-                      rowIndex: row.index,
-                    }))
+                  const interactive = columns[col.index].interactive
+                  const cellInteractive =
+                    interactive === true ||
+                    (typeof interactive === 'function' &&
+                      interactive({
+                        rowData: data[row.index],
+                        rowIndex: row.index,
+                      }))
 
-                const cellIsActive =
-                  activeCell?.row === row.index &&
-                  activeCell.col === col.index - 1
+                  const cellIsActive =
+                    activeCell?.row === row.index &&
+                    activeCell.col === col.index - 1
 
-                const isStickyLeft =
-                  hasStickyLeftColumn && columns[col.index].sticky === 'left'
+                  const isStickyLeft =
+                    hasStickyLeftColumn && columns[col.index].sticky === 'left'
 
-                const isLoading = loading || data[row.index] === null
+                  const isLoading = loading || data[row.index] === null
 
-                if (isLoading && col.index === 0) return null
+                  if (isLoading && col.index === 0) return null
 
-                return (
-                  <CellComponent
-                    key={col.key}
-                    gutter={!isLoading && col.index === 0}
-                    stickyRight={
-                      hasStickyRightColumn && col.index === columns.length - 1
-                    }
-                    stickyLeft={isStickyLeft}
-                    active={col.index === 0 && rowActive}
-                    disabled={cellDisabled}
-                    interactive={cellInteractive}
-                    padding={
-                      !columns[col.index].disablePadding && col.index !== 0
-                    }
-                    className={cx(
-                      !isLoading
-                        ? typeof colCellClassName === 'function' // Disable when isLoading to prevent any special behavior for isLoading view
-                          ? colCellClassName({
-                              rowData: data[row.index],
-                              rowIndex: row.index,
-                              columnId: columns[col.index].id,
-                            })
-                          : colCellClassName
-                        : undefined,
-                      !isLoading
-                        ? typeof cellClassName === 'function'
-                          ? cellClassName({
-                              rowData: data[row.index],
-                              rowIndex: row.index,
-                              columnId: columns[col.index].id,
-                            })
-                          : cellClassName
-                        : undefined
-                    )}
-                    width={col.size}
-                    left={col.start}
-                  >
-                    {isLoading && col.index !== 0 ? (
-                      LoadingComponent
-                    ) : (
-                      <Component
-                        rowData={data[row.index]}
-                        getContextMenuItems={getContextMenuItems}
-                        disabled={cellDisabled}
-                        rowId={row.key.toString()}
-                        active={cellIsActive}
-                        columnIndex={col.index - 1}
-                        rowIndex={row.index}
-                        focus={cellIsActive && editing}
-                        deleteRow={deleteGivenRow(row.index)}
-                        duplicateRow={duplicateGivenRow(row.index)}
-                        stopEditing={stopEditing}
-                        insertRowBelow={insertAfterGivenRow(row.index)}
-                        setRowData={setGivenRowData(row.index)}
-                        columnData={columns[col.index].columnData}
-                        selected={rowSelected}
-                        selectRows={selectRows}
-                        toggleSelection={toggleGivenRow(row.index)}
-                        getRowId={getRowId}
-                        table={table}
-                      />
-                    )}
-                  </CellComponent>
-                )
-              })}
+                  return (
+                    <CellComponent
+                      key={col.key}
+                      gutter={!isLoading && col.index === 0}
+                      stickyRight={
+                        hasStickyRightColumn && col.index === columns.length - 1
+                      }
+                      stickyLeft={isStickyLeft}
+                      active={col.index === 0 && rowActive}
+                      disabled={cellDisabled}
+                      interactive={cellInteractive}
+                      padding={
+                        !columns[col.index].disablePadding && col.index !== 0
+                      }
+                      className={cx(
+                        !isLoading
+                          ? typeof colCellClassName === 'function' // Disable when isLoading to prevent any special behavior for isLoading view
+                            ? colCellClassName({
+                                rowData: data[row.index],
+                                rowIndex: row.index,
+                                columnId: columns[col.index].id,
+                              })
+                            : colCellClassName
+                          : undefined,
+                        !isLoading
+                          ? typeof cellClassName === 'function'
+                            ? cellClassName({
+                                rowData: data[row.index],
+                                rowIndex: row.index,
+                                columnId: columns[col.index].id,
+                              })
+                            : cellClassName
+                          : undefined
+                      )}
+                      width={col.size}
+                      left={col.start}
+                    >
+                      {isLoading && col.index !== 0 ? (
+                        LoadingComponent
+                      ) : (
+                        <Component
+                          rowData={data[row.index]}
+                          getContextMenuItems={getContextMenuItems}
+                          disabled={cellDisabled}
+                          rowId={row.key.toString()}
+                          active={cellIsActive}
+                          columnIndex={col.index - 1}
+                          rowIndex={row.index}
+                          focus={cellIsActive && editing}
+                          deleteRow={deleteGivenRow(row.index)}
+                          duplicateRow={duplicateGivenRow(row.index)}
+                          stopEditing={stopEditing}
+                          insertRowBelow={insertAfterGivenRow(row.index)}
+                          setRowData={setGivenRowData(row.index)}
+                          columnData={columns[col.index].columnData}
+                          selected={Boolean(rowSelected)}
+                          selectRows={selectRows}
+                          toggleSelection={toggleGivenRow(row.index)}
+                          getRowId={getRowId}
+                          table={table}
+                        />
+                      )}
+                    </CellComponent>
+                  )
+                })
+              )}
             </div>
           )
         })}

@@ -21,6 +21,7 @@ import {
   SelectionWithIdInput,
   TableCallbackProps,
   OperationResult,
+  RowType,
 } from '../types'
 import { useColumnWidths } from '../hooks/useColumnWidths'
 import { useResizeDetector } from 'react-resize-detector'
@@ -68,7 +69,7 @@ type ScrollBehavior = {
 // eslint-disable-next-line react/display-name
 export const DataSheetGrid = React.memo(
   React.forwardRef<DataSheetGridRef, DataSheetGridProps<any>>(
-    <T extends any>(
+    <T extends RowType>(
       {
         value: data = DEFAULT_DATA,
         className,
@@ -120,6 +121,9 @@ export const DataSheetGrid = React.memo(
         onBottomThrottleRate = 1_000,
 
         overscanRows,
+
+        groupRowComponent,
+        groupRowComponentProps,
       }: DataSheetGridProps<T>,
       ref: React.ForwardedRef<DataSheetGridRef>
     ): JSX.Element => {
@@ -2033,6 +2037,7 @@ export const DataSheetGrid = React.memo(
         ),
         setSelection: _setSelection,
         setActiveCell: _setActiveCell,
+        scrollRef: outerRef,
       }))
 
       const callbacksRef = useRef({
@@ -2232,6 +2237,8 @@ export const DataSheetGrid = React.memo(
             onBottomDataReached={onBottomDataReached}
             onBottomThrottleRate={onBottomThrottleRate}
             overscanRows={overscanRows}
+            groupRowComponent={groupRowComponent}
+            groupRowComponentProps={groupRowComponentProps}
           >
             <SelectionRect
               columnRights={columnRights}
@@ -2278,7 +2285,7 @@ export const DataSheetGrid = React.memo(
       )
     }
   )
-) as <T extends any>(
+) as <T extends RowType>(
   props: DataSheetGridProps<T> & { ref?: React.ForwardedRef<DataSheetGridRef> }
 ) => JSX.Element
 

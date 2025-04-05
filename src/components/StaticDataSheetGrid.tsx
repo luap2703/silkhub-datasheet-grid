@@ -1,5 +1,5 @@
-import { DataSheetGridProps, DataSheetGridRef } from '../types'
-import { useState, type JSX } from 'react';
+import { DataSheetGridProps, DataSheetGridRef, RowType } from '../types'
+import { useState, type JSX } from 'react'
 import { DataSheetGrid } from './DataSheetGrid'
 import React from 'react'
 
@@ -8,7 +8,7 @@ export const StaticDataSheetGrid = React.forwardRef<
   DataSheetGridRef,
   DataSheetGridProps<any>
 >(
-  <T extends any>(
+  <T extends RowType>(
     {
       columns,
       gutterColumn,
@@ -54,6 +54,6 @@ export const StaticDataSheetGrid = React.forwardRef<
       />
     )
   }
-) as <T extends any>(
+) as <T extends RowType>(
   props: DataSheetGridProps<T> & { ref?: React.ForwardedRef<DataSheetGridRef> }
 ) => JSX.Element

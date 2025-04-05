@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@reference "./globals.css";
+
+@layer base {
+  .mid-ellipsis {
+    @apply relative block max-w-full overflow-hidden text-ellipsis whitespace-nowrap;
+  }
+
+  .mid-ellipsis::before {
+    content: "...";
+    @apply absolute right-0 bg-inherit;
+  }
+
+  .mid-ellipsis span {
+    @apply absolute overflow-hidden text-ellipsis whitespace-nowrap;
+    max-width: calc(100% - 3ch); /* Adjust to account for the ellipsis size */
+  }
+}
